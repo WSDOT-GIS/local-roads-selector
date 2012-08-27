@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrafficImpactAnalysisControls", "TrafficImpactAnalysisControls.csproj", "{DCE15FC4-141F-4BB3-9790-A2D7F2A0771E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DCE15FC4-141F-4BB3-9790-A2D7F2A0771E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCE15FC4-141F-4BB3-9790-A2D7F2A0771E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCE15FC4-141F-4BB3-9790-A2D7F2A0771E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCE15FC4-141F-4BB3-9790-A2D7F2A0771E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

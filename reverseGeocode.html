@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Local Roads Selector Test</title>
+    <style>
+        html
+        {
+            font-family: Segoe UI;
+            background: white;
+            color: Black;
+        }
+        #map 
+        {
+            width: 640px;
+            height: 480px;
+        }
+    </style>
+    <!-- This stylesheet (or one from another theme) is required for the jQuery plug-in. -->
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css" type="text/css" media="all" />
+</head>
+<body>
+    <h1>Local Roads Selector Test</h1>
+    <p>This page demonstrates how to use the localRoadsSelector.js jQuery widget.  View the page's source for details. </p>
+    <h2>Instructions</h2>
+    <ol>
+        <li>Zoom into the map.</li>
+        <li>Click on an intersection to find the first point of the route.</li>
+        <li>Click additional intersections to generate a route.</li>
+    </ol>
+    <div id="map"></div>
+    <div id="debugSection">
+        <h2>Debug</h2>
+        <p>These buttons will send information to the debug console.  An exception will occur if you click the buttons when there are no corresponding graphics.</p>
+        <button id="getIntersectionsButton" title="Sends intersection graphics to the debug console.">Get Intersections</button>
+        <button id="getRoutesButton" title="Sends route graphics to the debug console.">Get Routes</button>
+    </div>
+    
+    <!-- Note the script prerequisites. -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" type="text/javascript"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="//serverapi.arcgisonline.com/jsapi/arcgis/?v=2.6compact"></script>
+    <script src="../Scripts/OgcSimpleGeometry.js" type="text/javascript"></script>
+    <script src="../Scripts/arcGisMap.js" type="text/javascript"></script>
+    <script src="../Scripts/localRoadsSelector.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        (function ($) {
+            "use strict";
+            $().ready(function () {
+                var debugButtons = $("#debugSection button");
+                $("#map").localRoadsSelector({
+                    reverseGeocodeHandlerUrl: "../ReverseGeocodeIntersection.ashx",
+                    routeTaskUrl: "http://tasks.arcgisonline.com/ArcGIS/rest/services/NetworkAnalysis/ESRI_Route_NA/NAServer/Route",
+                    geometryServiceUrl: "http://hqolymgis06p/ArcGIS/rest/services/Geometry/GeometryServer",
+                    layers: [
+                        {
+                            url: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/",
+                            type: "esri.layers.ArcGISTiledMapServiceLayer"
+                        }
+                    ],
+                    intersectionFound: function (event, intersection) {
+                        //console.log(intersection.geometry, new ogc.SimpleGeometry(intersection.geometry).toEsriGeometry());
+                    },
+                    routeFound: function (event, route) {
+                        //console.log(route.geometry, new ogc.SimpleGeometry(route.geometry).toEsriGeometry());
+                    },
+                    resizeWithWindow: false
+                });
+
+                if (typeof(console) !== "undefined" && typeof(console.debug) === "function") {
+                    debugButtons.button();
+                    $("#getIntersectionsButton").click(function (evt) {
+                        var intersections = $("#map").localRoadsSelector("getIntersections", function (intersections) {
+                            console.debug(intersections);
+                        }, function (error) {
+                            console.debug("Projection failed", error);
+                        });
+
+                    });
+
+                    $("#getRoutesButton").click(function (evt) {
+                        var intersections = $("#map").localRoadsSelector("getRoutes", function (intersections) {
+                            console.debug(intersections);
+                        }, function (error) {
+                            console.debug("Projection failed", error);
+                        });
+
+                    });
+                } else {
+                    debugButtons.attr("disabled", true);
+                }
+            });
+        } (jQuery));
+    </script>
+</body>
+</html>
