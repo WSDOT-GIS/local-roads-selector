@@ -2,10 +2,15 @@
 ////dojo.require("esri.graphic");
 ////dojo.require("esri.tasks.route");
 ////dojo.require("esri.tasks.geometry");
+/// <reference path="jsapi_vsdoc_v31.js" />
 
 
 (function ($) {
 	"use strict";
+
+	function createLocationId() {
+		return new Date().getTime();
+	}
 
 	$.widget("ui.localRoadsSelector", {
 		options: {
@@ -113,12 +118,18 @@
 		getIntersections: function (projectionCompleteFunction, projectionFailFunction) {
 			// TODO: Create projected copies of intersection point graphics and return them in an array.
 			var self = this, stopGeometries;
-			stopGeometries = dojo.map(self.stopsLayer.graphics, function (graphic) {
-				return graphic.geometry;
-			});
-			// console.debug(stopGeometries);
+			////stopGeometries = dojo.map(self.stopsLayer.graphics, function (graphic) {
+			////	return graphic.geometry;
+			////});
+			stopGeometries = esri.getGeometries(self.stopsLayer.graphics);
+
 			self._geometryServiceTask.project(stopGeometries, self.options.eventSpatialReference, function (projectedPoints) {
-				projectionCompleteFunction(projectedPoints);
+				var i, l, outFeatures = [], current;
+				for (i = 0, l = projectedPoints.length; i < l; i += 1) {
+					current = new esri.Graphic(projectedPoints[i], null, self.stopsLayer.graphics[i].attributes, null);
+					outFeatures.push(current);
+				}
+				projectionCompleteFunction(outFeatures);
 			}, function (error) {
 				if (typeof (projectionFailFunction === "function")) {
 					projectionFailFunction(error);
@@ -128,9 +139,8 @@
 		getRoutes: function (projectionCompleteFunction, projectionFailFunction) {
 			// TODO: Create projected copies of route polyline graphics and return them in an array.
 			var self = this, routeGeometries;
-			routeGeometries = dojo.map(self.routeLayer.graphics, function (graphic) {
-				return graphic.geometry;
-			});
+			routeGeometries = esri.getGeometries(self.routeLayer.graphics);
+
 			// console.debug(routeGeometries);
 			self._geometryServiceTask.project(routeGeometries, self.options.eventSpatialReference, function (projectedPolylines) {
 				projectionCompleteFunction(projectedPolylines);
@@ -141,7 +151,7 @@
 			});
 		},
 		_create: function () {
-			var self = this, startSymbol, defaultSymbol, endSymbol, routeSymbol, routeTask;
+			var self = this, startSymbol, defaultSymbol, endSymbol, routeSymbol, routeTask, locationId = createLocationId();
 
 			function init() {
 				// Initialize the geometry service task.
@@ -166,94 +176,107 @@
 				self.options.eventSpatialReference = toEsriSpatialReference(self.options.eventSpatialReference);
 
 				function handleMapClick(event) {
-					var location, prevGraphic;
+					var location, prevGraphic, locationEnd = event.type === "dblclick";
+
+					console.debug(this, event);
 
 					location = String(event.mapPoint.x) + "," + String(event.mapPoint.y);
 
 					self._showBusyDialog("Searching for intersection...");
 
-					$.get(self.options.reverseGeocodeHandlerUrl, {
-						location: location,
-						inSR: 102100,
-						distance: "10",
-						outSR: 102100
-					}, function (data, textStatus) {
-						var graphic, routeParams
-						if (textStatus === "success") {
-							if (data.address && data.location) {
-								//// graphic = new esri.Graphic(esri.geometry.fromJson(data.location), startSymbol, data.address, new esri.InfoTemplate("Address", "${Street}<br />${City}, ${State}  ${ZIP}"));
-								graphic = new esri.Graphic({
-									geometry: esri.geometry.fromJson(data.location),
-									attributes: data.address
-								});
-								graphic.attributes.Name = graphic.attributes.Street;
-
-								// If no stops have been defined yet, this is the start graphic.  Otherwise its the end graphic.
-								graphic.attributes.position = self.stopsLayer.graphics.length === 0 ? "start" : "end";
-
-								self.stopsLayer.add(graphic);
-
-								// Trigger the intersection found event.
-								self._triggerIntersectionFound(graphic);
-
-								if (self.stopsLayer.graphics.length >= 2) {
-									self._showBusyDialog("Searching for route...");
-									// The the second to last graphic.
-									prevGraphic = self.stopsLayer.graphics[self.stopsLayer.graphics.length - 2];
-
-									// If the previous graphic also is set as an "end" point, clear this attribute.
-									if (prevGraphic.attributes.position === "end") {
-										prevGraphic.attributes.position = null;
-									}
-									// Initialize the route task.
-									if (!routeTask) {
-										routeTask = new esri.tasks.RouteTask(self.options.routeTaskUrl);
-									}
-									routeParams = new esri.tasks.RouteParameters();
-									routeParams.stops = new esri.tasks.FeatureSet();
-									routeParams.stops.features.push(prevGraphic);
-									routeParams.stops.features.push(graphic);
-									routeParams.stops.geometryType = "point";
-									// routeParams.impedanceAttribute = "Length";
-									routeParams.restrictionAttributes = ["none"]; // Ignore one-way streets.
-									routeParams.returnRoutes = true;
-									routeParams.returnDirections = false;
-									routeParams.directionLengthUnits = esri.Units.MILES;
-									routeParams.outSpatialReference = new esri.SpatialReference({ wkid: 102100 });
-
-									routeTask.solve(routeParams, function (solveResults) {
-										var route;
-										if (solveResults && solveResults.routeResults !== undefined) {
-											if (solveResults.routeResults.length) {
-												route = solveResults.routeResults[0].route;
-												route.geometry.spatialReference = map.spatialReference;
-												self.routeLayer.add(route);
-												self._triggerRouteFound(route);
-											}
-										}
-										self._hideBusyDialog();
-									}, function (error) {
-										var message = typeof (error) === "string" ? error : typeof (error) === "object" && typeof (error.message) !== "undefined" ? error.message : "An error has occurred finding the route location.";
-										self._hideBusyDialog();
-										self._showMessage(message, "Error finding route");
-										if (console !== undefined) {
-											console.error(error);
-										}
+					(function (isLastStop) {
+						$.get(self.options.reverseGeocodeHandlerUrl, {
+							location: location,
+							inSR: 102100,
+							distance: "10",
+							outSR: 102100
+						}, function (data, textStatus) {
+							var graphic, routeParams
+							if (textStatus === "success") {
+								if (data.address && data.location) {
+									//// graphic = new esri.Graphic(esri.geometry.fromJson(data.location), startSymbol, data.address, new esri.InfoTemplate("Address", "${Street}<br />${City}, ${State}  ${ZIP}"));
+									graphic = new esri.Graphic({
+										geometry: esri.geometry.fromJson(data.location),
+										attributes: data.address
 									});
-								} else {
-									self._hideBusyDialog();
-								}
+									graphic.attributes.Name = graphic.attributes.Street;
+									// graphic.attributes.locationId = locationId;
 
-								self.stopsLayer.refresh();
+									// If no stops have been defined yet, this is the start graphic.  Otherwise its the end graphic.
+									graphic.attributes.position = self.stopsLayer.graphics.length === 0 ? "start" : "end";
+
+									self.stopsLayer.add(graphic);
+
+									// Trigger the intersection found event.
+									self._triggerIntersectionFound(graphic);
+
+									if (self.stopsLayer.graphics.length >= 2) {
+										self._showBusyDialog("Searching for route...");
+										// The the second to last graphic.
+										prevGraphic = self.stopsLayer.graphics[self.stopsLayer.graphics.length - 2];
+
+										// If the previous graphic also is set as an "end" point, clear this attribute.
+										if (prevGraphic.attributes.position === "end") {
+											prevGraphic.attributes.position = null;
+										}
+										// Initialize the route task.
+										if (!routeTask) {
+											routeTask = new esri.tasks.RouteTask(self.options.routeTaskUrl);
+										}
+										routeParams = new esri.tasks.RouteParameters();
+										routeParams.stops = new esri.tasks.FeatureSet();
+										routeParams.stops.features.push(prevGraphic);
+										routeParams.stops.features.push(graphic);
+										routeParams.stops.geometryType = "point";
+										// routeParams.impedanceAttribute = "Length";
+										routeParams.restrictionAttributes = ["none"]; // Ignore one-way streets.
+										routeParams.returnRoutes = true;
+										routeParams.returnDirections = false;
+										routeParams.directionLengthUnits = esri.Units.MILES;
+										routeParams.outSpatialReference = new esri.SpatialReference({ wkid: 102100 });
+
+										routeTask.solve(routeParams, function (solveResults) {
+											var route;
+											if (solveResults && solveResults.routeResults !== undefined) {
+												if (solveResults.routeResults.length) {
+													route = solveResults.routeResults[0].route;
+													route.geometry.setSpatialReference(routeParams.outSpatialReference);
+													route.attributes.locationId = locationId;
+													self.routeLayer.add(route);
+													self._triggerRouteFound(route);
+													if (isLastStop) {
+														self.stopsLayer.clear();
+														locationId = createLocationId();
+													}
+												}
+											}
+											self._hideBusyDialog();
+										}, function (error) {
+											var message = typeof (error) === "string" ? error : typeof (error) === "object" && typeof (error.message) !== "undefined" ? error.message : "An error has occurred finding the route location.";
+											self._hideBusyDialog();
+											self._showMessage(message, "Error finding route");
+											if (console !== undefined) {
+												console.error(error);
+											}
+										});
+									} else {
+										self._hideBusyDialog();
+									}
+
+
+
+
+									self.stopsLayer.refresh();
+								}
+								else {
+									self._hideBusyDialog();
+									self._showMessage("No intersections found at this location.");
+								}
+							} else {
+								console.error(textStatus, data);
 							}
-							else {
-								self._hideBusyDialog();
-								self._showMessage("No intersections found at this location.");
-							}
-						} else {
-							console.error(textStatus, data);
-						}
-					}, "json");
+						}, "json");
+					} (locationEnd));
 				}
 
 
@@ -262,6 +285,9 @@
 					resizeWithWindow: self.options.resizeWithWindow,
 					mapLoad: function (event, map) {
 						var renderer;
+
+						map.disableDoubleClickZoom();
+
 						function setupToolbar() {
 							var mapRoot = $("[id$=root]", self.element);
 							// Create toolbar & buttons.
@@ -323,6 +349,7 @@
 
 
 						dojo.connect(map, "onClick", handleMapClick);
+						dojo.connect(map, "onDblClick", handleMapClick);
 
 
 						setupToolbar();
