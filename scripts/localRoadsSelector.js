@@ -1,4 +1,6 @@
-﻿////dojo.require("esri.symbol");
+﻿/*global esri, dojo, jQuery*/
+/*jslint nomen: true, regexp: true, white:true */
+////dojo.require("esri.symbol");
 ////dojo.require("esri.graphic");
 ////dojo.require("esri.tasks.route");
 ////dojo.require("esri.tasks.geometry");
@@ -17,16 +19,18 @@
 		/// <param name="graphics" type="esri.Graphic[]">An array of graphics.</param>
 		/// <param name="geometries" type="esri.geometry.Geometry[]">An array of geometries.</param>
 		/// <returns type="esri.Graphic[]" />
-		var output, i, l, graphic, geometry;
+		var output, i, l, graphic;
 		output = [];
 		if (graphics.length !== geometries.length) {
-			throw Error('The "graphics" and "geometries" arrays should have the same number of elements."');
+			throw new Error('The "graphics" and "geometries" arrays should have the same number of elements."');
 		}
 
 		for (i = 0, l = graphics.length; i < l; i += 1) {
 			graphic = graphics[i].toJson();
 			graphic.geometry = geometries[i];
-			graphic = new esri.Graphic(graphic);
+			if (esri) {
+				graphic = new esri.Graphic(graphic);
+			}
 			output.push(graphic);
 		}
 
@@ -36,14 +40,15 @@
 	function splitRouteName(routeName) {
 		/// <summary>Splits a route name into its four component street names.</summary>
 		/// <returns type="Object">An object with the following properties: main, start, and end.</returns>
-		var match, streetNames, _routeNameRegex = /^([^-&]+?)\s*&\s*([^-&]+?)\s*-\s*([^-&]+?)\s*&\s*([^-&]+)$/i; // This will be used to split the segment names.
+		var match, streetNames, _routeNameRegex = /^([^\-&]+?)\s*&\s*([^\-&]+?)\s*-\s*([^\-&]+?)\s*&\s*([^\-&]+)$/i; // This will be used to split the segment names.
 
 		function findMainStreetName(streetNames) {
-			/// <summary>Compares the list of street names and determines which is the main street.  This will be the street whos name is included in the array twice.</summary>
-			/// <param name="streetNames" type="String[]">An array containing four strings.</param>
+			/// <summary>Compares the list of street names and determines which is the main street.  This will be the street name that is included in the array twice.</summary>
+			/// <param name="streetNames" type="String[]">An array containing five strings.</param>
 			/// <returns type="Object" />
 
-			var i, j, start, end, main, output = null;
+			var i, j, main, output = null;
+			/*jslint plusplus:true*/
 			for (i = 1; i <= 2; i++) {
 				for (j = 3; j <= 4; j++) {
 					if (streetNames[i] === streetNames[j]) {
@@ -55,12 +60,13 @@
 					break;
 				}
 			}
+			/*jslint plusplus:false*/
 
 			if (main) {
 				output = {
 					main: main,
-					start: i == 1 ? streetNames[2] : streetNames[1],
-					end: j == 3 ? streetNames[4] : streetNames[3]
+					start: i === 1 ? streetNames[2] : streetNames[1],
+					end: j === 3 ? streetNames[4] : streetNames[3]
 				};
 			}
 
@@ -144,6 +150,14 @@
 		},
 		stopsLayer: null,
 		routeLayer: null,
+		_tooltip: null,
+		_setTooltipStart: function () {
+			this._tooltip.html("Click an intersection to begin.");
+		},
+
+		_setTooltipNext: function () {
+			this._tooltip.html("Click another intersection to draw a route.<br/>Double-click an intersection to end.");
+		},
 		deleteLastSegment: function () {
 			var gfx;
 			function deleteLastGraphic(layer) {
@@ -164,6 +178,8 @@
 			// Set the new last graphic's position to end (unless it's the only one).
 			if (gfx.length > 1) {
 				gfx[gfx.length - 1].attributes.position = "end";
+			} else {
+				this._setTooltipStart();
 			}
 			this.stopsLayer.refresh();
 			return this;
@@ -171,11 +187,11 @@
 		clearSegments: function () {
 			this.stopsLayer.clear();
 			this.routeLayer.clear();
+			this._setTooltipStart();
 			return this;
 		},
 		_geometryServiceTask: null,
 		_triggerIntersectionFound: function (graphic) {
-			// TODO: Project to state plane south
 			this._trigger("intersectionFound", this, graphic);
 		},
 		_triggerRouteFound: function (graphic) {
@@ -209,27 +225,33 @@
 				}
 			});
 		},
+
 		_create: function () {
 			var self = this, startSymbol, defaultSymbol, endSymbol, routeSymbol, routeTask, locationId = createLocationId();
+
+			self._tooltip = $("<div>").addClass("ui-local-roads-selector-tooltip").hide().appendTo("body");
+			self._setTooltipStart();
 
 			function init() {
 				// Initialize the geometry service task.
 				self._geometryServiceTask = new esri.tasks.GeometryService(self.options.geometryServiceUrl);
 
 				function toEsriSpatialReference(srInput) {
-					var type = typeof (srInput);
+					var type = typeof (srInput), output;
 					// Initialize the output spatial reference.
 					if (type === "number") {
-						return new esri.SpatialReference({
+						output = new esri.SpatialReference({
 							wkid: srInput
 						});
 					} else if (type === "string") {
-						return new esri.SpatialReference({
+						output = new esri.SpatialReference({
 							wkt: srInput
 						});
-					} else if ((type === "object") && (typeof (srInput.isInstanceOf) === "undefined" || !srInput.isInstanceOf(esri.SpatialReference))) {
-						return new esri.SpatialReference(srInput);
+					} else if ((type === "object") && (srInput.isInstanceOf === undefined || !srInput.isInstanceOf(esri.SpatialReference))) {
+						output = new esri.SpatialReference(srInput);
 					}
+
+					return output;
 				}
 
 				self.options.eventSpatialReference = toEsriSpatialReference(self.options.eventSpatialReference);
@@ -238,6 +260,8 @@
 					var location, prevGraphic, locationEnd = event.type === "dblclick";
 
 					location = String(event.mapPoint.x) + "," + String(event.mapPoint.y);
+
+
 
 					self._showBusyDialog("Searching for intersection...");
 
@@ -248,8 +272,9 @@
 							distance: "10",
 							outSR: 102100
 						}, function (data, textStatus) {
-							var graphic, routeParams
+							var graphic, routeParams;
 							if (textStatus === "success") {
+								self._setTooltipNext();
 								if (data.address && data.location) {
 									//// graphic = new esri.Graphic(esri.geometry.fromJson(data.location), startSymbol, data.address, new esri.InfoTemplate("Address", "${Street}<br />${City}, ${State}  ${ZIP}"));
 									graphic = new esri.Graphic({
@@ -294,7 +319,7 @@
 										routeParams.outSpatialReference = new esri.SpatialReference({ wkid: 102100 });
 
 										routeTask.solve(routeParams, function (solveResults) {
-											var route, segParts, key;
+											var route, segParts;
 											if (solveResults && solveResults.routeResults !== undefined) {
 												if (solveResults.routeResults.length) {
 													route = solveResults.routeResults[0].route;
@@ -307,11 +332,7 @@
 														if (segParts instanceof Array) {
 															route.attributes.parts = segParts;
 														} else {
-															for (key in segParts) {
-																if (segParts.hasOwnProperty(key)) {
-																	route.attributes[key] = segParts[key];
-																}
-															}
+															route.attributes.Name = [segParts.main, "from", segParts.start, "to", segParts.end].join(" ");
 														}
 													}
 
@@ -319,6 +340,7 @@
 													self.routeLayer.add(route);
 													self._triggerRouteFound(route);
 													if (isLastStop) {
+														self._setTooltipStart();
 														self.stopsLayer.clear();
 														locationId = createLocationId();
 													}
@@ -326,12 +348,14 @@
 											}
 											self._hideBusyDialog();
 										}, function (error) {
-											var message = typeof (error) === "string" ? error : typeof (error) === "object" && typeof (error.message) !== "undefined" ? error.message : "An error has occurred finding the route location.";
+											var message = typeof (error) === "string" ? error : typeof (error) === "object" && error.message !== undefined ? error.message : "An error has occurred finding the route location.";
 											self._hideBusyDialog();
 											self._showMessage(message, "Error finding route");
+											/*jslint devel:true*/
 											if (console !== undefined) {
 												console.error(error);
 											}
+											/*jslint devel:false*/
 										});
 									} else {
 										self._hideBusyDialog();
@@ -347,7 +371,9 @@
 									self._showMessage("No intersections found at this location.");
 								}
 							} else {
-								console.error(textStatus, data);
+								if (console !== undefined) {
+									console.error(textStatus, data);
+								}
 							}
 						}, "json");
 					} (locationEnd));
@@ -359,7 +385,6 @@
 					resizeWithWindow: self.options.resizeWithWindow,
 					mapLoad: function (event, map) {
 						var renderer;
-
 						map.disableDoubleClickZoom();
 
 						function setupToolbar() {
@@ -385,7 +410,7 @@
 						}
 
 						startSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color("green"));
-						defaultSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color("yellow"))
+						defaultSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color("yellow"));
 						endSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color("red"));
 						routeSymbol = new esri.symbol.SimpleLineSymbol();
 
@@ -424,6 +449,22 @@
 
 						dojo.connect(map, "onClick", handleMapClick);
 						dojo.connect(map, "onDblClick", handleMapClick);
+
+						dojo.connect(map, "onMouseOver", function (/*event*/) {
+							self._tooltip.show();
+						});
+
+						dojo.connect(map, "onMouseOut", function (/*event*/) {
+							self._tooltip.hide();
+						});
+
+						dojo.connect(map, "onMouseMove", function (event) {
+							self._tooltip.css({
+								position: "absolute",
+								left: event.pageX + 10,
+								top: event.pageY
+							});
+						});
 
 
 						setupToolbar();
