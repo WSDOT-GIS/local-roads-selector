@@ -1,4 +1,5 @@
-﻿/*global esri, dojo, jQuery*/
+﻿/** Copyright 2012 Washington State Department of Transportation.  Licensed under The MIT License (http://opensource.org/licenses/MIT). **/
+/*global esri, dojo, jQuery*/
 /*jslint nomen: true, regexp: true, white:true */
 ////dojo.require("esri.symbol");
 ////dojo.require("esri.graphic");
