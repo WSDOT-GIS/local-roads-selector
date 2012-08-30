@@ -12,6 +12,79 @@
 		return new Date().getTime();
 	}
 
+	function copyGeometriesWithNewGraphics(graphics, geometries) {
+		/// <summary>Creates copies of the input graphics.  The geometries will of the copies be replaced with those from "geometries"</summary>
+		/// <param name="graphics" type="esri.Graphic[]">An array of graphics.</param>
+		/// <param name="geometries" type="esri.geometry.Geometry[]">An array of geometries.</param>
+		/// <returns type="esri.Graphic[]" />
+		var output, i, l, graphic, geometry;
+		output = [];
+		if (graphics.length !== geometries.length) {
+			throw Error('The "graphics" and "geometries" arrays should have the same number of elements."');
+		}
+
+		for (i = 0, l = graphics.length; i < l; i += 1) {
+			graphic = graphics[i].toJson();
+			graphic.geometry = geometries[i];
+			graphic = new esri.Graphic(graphic);
+			output.push(graphic);
+		}
+
+		return output;
+	}
+
+	function splitRouteName(routeName) {
+		/// <summary>Splits a route name into its four component street names.</summary>
+		/// <returns type="Object">An object with the following properties: main, start, and end.</returns>
+		var match, streetNames, _routeNameRegex = /^([^-&]+?)\s*&\s*([^-&]+?)\s*-\s*([^-&]+?)\s*&\s*([^-&]+)$/i; // This will be used to split the segment names.
+
+		function findMainStreetName(streetNames) {
+			/// <summary>Compares the list of street names and determines which is the main street.  This will be the street whos name is included in the array twice.</summary>
+			/// <param name="streetNames" type="String[]">An array containing four strings.</param>
+			/// <returns type="Object" />
+
+			var i, j, start, end, main, output = null;
+			for (i = 1; i <= 2; i++) {
+				for (j = 3; j <= 4; j++) {
+					if (streetNames[i] === streetNames[j]) {
+						main = streetNames[i];
+						break;
+					}
+				}
+				if (main) {
+					break;
+				}
+			}
+
+			if (main) {
+				output = {
+					main: main,
+					start: i == 1 ? streetNames[2] : streetNames[1],
+					end: j == 3 ? streetNames[4] : streetNames[3]
+				};
+			}
+
+			return output;
+		}
+
+		match = _routeNameRegex.exec(routeName);
+
+		if (match) {
+			streetNames = findMainStreetName(match);
+			if (!streetNames) {
+				streetNames = match;
+			}
+		} else {
+			streetNames = null;
+		}
+
+		return streetNames;
+	}
+
+
+
+	$.fn.splitRouteName = splitRouteName;
+
 	$.widget("ui.localRoadsSelector", {
 		options: {
 			reverseGeocodeHandlerUrl: "../ReverseGeocodeIntersection.ashx",
@@ -26,13 +99,6 @@
 			initialGraphics: null, // This will be used to have routes and segments already on the map.
 			eventSpatialReference: 2927, // When events are triggered, this is the spatial reference they will be projected to.
 			resizeWithWindow: true
-		},
-		splitRouteName: function (routeName) {
-			/// <summary>Splits a route name into its four component street names.</summary>
-			/// <returns type="String[]" />
-			var match, streetNames, _routeNameRegex = /([^&]+)\s*&\s*([^&-]+)\s*-\s*([^&]+)\s*&\s*([^&-]+)/; // This will be used to split the segment names.
-			// TODO: Create a match object and convert the captured groups into an array of strings, then return the string.
-			throw new Error("Not implemented.");
 		},
 		_showMessage: function (message, title) {
 			/// <summary>Shows a message in a jQuery UI dialog.</summary>
@@ -116,19 +182,12 @@
 			this._trigger("routeFound", this, graphic);
 		},
 		getIntersections: function (projectionCompleteFunction, projectionFailFunction) {
-			// TODO: Create projected copies of intersection point graphics and return them in an array.
+			// Create projected copies of intersection point graphics and return them in an array.
 			var self = this, stopGeometries;
-			////stopGeometries = dojo.map(self.stopsLayer.graphics, function (graphic) {
-			////	return graphic.geometry;
-			////});
 			stopGeometries = esri.getGeometries(self.stopsLayer.graphics);
 
 			self._geometryServiceTask.project(stopGeometries, self.options.eventSpatialReference, function (projectedPoints) {
-				var i, l, outFeatures = [], current;
-				for (i = 0, l = projectedPoints.length; i < l; i += 1) {
-					current = new esri.Graphic(projectedPoints[i], null, self.stopsLayer.graphics[i].attributes, null);
-					outFeatures.push(current);
-				}
+				var outFeatures = copyGeometriesWithNewGraphics(self.stopsLayer.graphics, projectedPoints);
 				projectionCompleteFunction(outFeatures);
 			}, function (error) {
 				if (typeof (projectionFailFunction === "function")) {
@@ -137,13 +196,13 @@
 			});
 		},
 		getRoutes: function (projectionCompleteFunction, projectionFailFunction) {
-			// TODO: Create projected copies of route polyline graphics and return them in an array.
+			// Create projected copies of route polyline graphics and return them in an array.
 			var self = this, routeGeometries;
 			routeGeometries = esri.getGeometries(self.routeLayer.graphics);
 
-			// console.debug(routeGeometries);
 			self._geometryServiceTask.project(routeGeometries, self.options.eventSpatialReference, function (projectedPolylines) {
-				projectionCompleteFunction(projectedPolylines);
+				var outFeatures = copyGeometriesWithNewGraphics(self.routeLayer.graphics, projectedPolylines);
+				projectionCompleteFunction(outFeatures);
 			}, function (error) {
 				if (typeof (projectionFailFunction === "function")) {
 					projectionFailFunction(error);
@@ -177,8 +236,6 @@
 
 				function handleMapClick(event) {
 					var location, prevGraphic, locationEnd = event.type === "dblclick";
-
-					console.debug(this, event);
 
 					location = String(event.mapPoint.x) + "," + String(event.mapPoint.y);
 
@@ -233,15 +290,32 @@
 										routeParams.returnRoutes = true;
 										routeParams.returnDirections = false;
 										routeParams.directionLengthUnits = esri.Units.MILES;
+										// TODO: Get spatial reference from map instead of creating a new object.
 										routeParams.outSpatialReference = new esri.SpatialReference({ wkid: 102100 });
 
 										routeTask.solve(routeParams, function (solveResults) {
-											var route;
+											var route, segParts, key;
 											if (solveResults && solveResults.routeResults !== undefined) {
 												if (solveResults.routeResults.length) {
 													route = solveResults.routeResults[0].route;
+													// Add a spatial reference to the geometry.
 													route.geometry.setSpatialReference(routeParams.outSpatialReference);
 													route.attributes.locationId = locationId;
+
+													segParts = splitRouteName(route.attributes.Name);
+													if (segParts) {
+														if (segParts instanceof Array) {
+															route.attributes.parts = segParts;
+														} else {
+															for (key in segParts) {
+																if (segParts.hasOwnProperty(key)) {
+																	route.attributes[key] = segParts[key];
+																}
+															}
+														}
+													}
+
+
 													self.routeLayer.add(route);
 													self._triggerRouteFound(route);
 													if (isLastStop) {
