@@ -2,3 +2,4 @@ bin
 obj
 *.user
 *.suo
+scripts/jsapi_vsdoc_v31.js
