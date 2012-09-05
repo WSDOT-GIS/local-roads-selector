@@ -51,7 +51,7 @@ This code is licensed under [The MIT License](http://opensource.org/licenses/MIT
 ## *localRoadsSelector* parameters ##
 
 ### *reverseGeocodeHandlerUrl* ###
-Since the [ArcGIS REST API](http://resources.arcgis.com/en/help/rest/apiref/) [does not currently support reverse geocoding to an intersection](https://c.na9.visual.force.com/apex/ideaView?id=087E00000004JU9IAM), a special handler must be used that calls the [ArcGIS SOAP API](http://resources.arcgis.com/en/help/soap/10.1/)'s [reverse geocode](http://resources.arcgis.com/en/help/soap/10.1/#/ReverseGeocode/01vp000000n6000000/) endpoint and converts its results from XML to JSON.  The `ReverseGeocodeIntersection.ashx` handler provides this ability.
+Since the [ArcGIS REST API](http://resources.arcgis.com/en/help/rest/apiref/) does not currently support reverse geocoding to an intersection, a special handler must be used that calls the [ArcGIS SOAP API](http://resources.arcgis.com/en/help/soap/10.1/)'s [reverse geocode](http://resources.arcgis.com/en/help/soap/10.1/#/ReverseGeocode/01vp000000n6000000/) endpoint and converts its results from XML to JSON.  The `ReverseGeocodeIntersection.ashx` handler provides this ability.
 
 ### *routeTaskUrl* ###
 REST URL for a [network layer](http://resources.arcgis.com/en/help/rest/apiref/index.html?nalayer.html).
