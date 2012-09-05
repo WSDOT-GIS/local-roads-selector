@@ -60,7 +60,7 @@ REST URL for a [network layer](http://resources.arcgis.com/en/help/rest/apiref/i
 REST URL for a [geoemtry service](http://resources.arcgis.com/en/help/rest/apiref/index.html?geometryserver.html).
 
 ### *resizeWithWindow* ###
-Set to true to call the map's [resize](http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/map.htm#resize) function when the browser window is resized.  Set to false otherwise.
+Set to `true` to call the map's [resize](http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/map.htm#resize) function when the browser window is resized.  Set to `false` otherwise.
 
 ### *intersectionFound* event handler ###
 You can specify a function that will be run each time an intersection is successfully located.
