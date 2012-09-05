@@ -51,9 +51,10 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="LICENSE" />
     <Content Include="reverseGeocode.html" />
     <Content Include="scripts\arcGisMap.js" />
-    <None Include="scripts\jsapi_vsdoc_v31.js" />
+    <None Include="README.md" />
     <Content Include="scripts\localRoadsSelector.js" />
     <Content Include="scripts\OgcSimpleGeometry.js" />
     <Content Include="Web.config" />
