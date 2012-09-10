@@ -55,6 +55,7 @@
     <Content Include="reverseGeocode.html" />
     <Content Include="scripts\arcGisMap.js" />
     <None Include="README.md" />
+    <Content Include="scripts\graphicInfoTable.js" />
     <Content Include="scripts\localRoadsSelector.js" />
     <Content Include="scripts\OgcSimpleGeometry.js" />
     <Content Include="Web.config" />

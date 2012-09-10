@@ -103,7 +103,9 @@
 						type: "esri.layers.ArcGISTiledMapServiceLayer"
 					}
 			],
-			initialGraphics: null, // This will be used to have routes and segments already on the map.
+			// This will be used to have routes and segments already on the map.  This should be JSON that can be used to initialize a feature set.
+			initialGraphics: null,
+
 			eventSpatialReference: 2927, // When events are triggered, this is the spatial reference they will be projected to.
 			resizeWithWindow: true
 		},
@@ -201,30 +203,38 @@
 		getIntersections: function (projectionCompleteFunction, projectionFailFunction) {
 			// Create projected copies of intersection point graphics and return them in an array.
 			var self = this, stopGeometries;
-			stopGeometries = esri.getGeometries(self.stopsLayer.graphics);
+			stopGeometries = self.stopsLayer.graphics.length < 1 ? [] : esri.getGeometries(self.stopsLayer.graphics);
 
-			self._geometryServiceTask.project(stopGeometries, self.options.eventSpatialReference, function (projectedPoints) {
-				var outFeatures = copyGeometriesWithNewGraphics(self.stopsLayer.graphics, projectedPoints);
-				projectionCompleteFunction(outFeatures);
-			}, function (error) {
-				if (typeof (projectionFailFunction === "function")) {
-					projectionFailFunction(error);
-				}
-			});
+			if (stopGeometries.length > 0) {
+				self._geometryServiceTask.project(stopGeometries, self.options.eventSpatialReference, function (projectedPoints) {
+					var outFeatures = copyGeometriesWithNewGraphics(self.stopsLayer.graphics, projectedPoints);
+					projectionCompleteFunction(outFeatures);
+				}, function (error) {
+					if (typeof (projectionFailFunction === "function")) {
+						projectionFailFunction(error);
+					}
+				});
+			} else {
+				projectionCompleteFunction([]);
+			}
 		},
 		getRoutes: function (projectionCompleteFunction, projectionFailFunction) {
 			// Create projected copies of route polyline graphics and return them in an array.
 			var self = this, routeGeometries;
-			routeGeometries = esri.getGeometries(self.routeLayer.graphics);
+			routeGeometries = self.routeLayer.graphics.length > 0 ? esri.getGeometries(self.routeLayer.graphics) : [];
 
-			self._geometryServiceTask.project(routeGeometries, self.options.eventSpatialReference, function (projectedPolylines) {
-				var outFeatures = copyGeometriesWithNewGraphics(self.routeLayer.graphics, projectedPolylines);
-				projectionCompleteFunction(outFeatures);
-			}, function (error) {
-				if (typeof (projectionFailFunction === "function")) {
-					projectionFailFunction(error);
-				}
-			});
+			if (routeGeometries.length > 0) {
+				self._geometryServiceTask.project(routeGeometries, self.options.eventSpatialReference, function (projectedPolylines) {
+					var outFeatures = copyGeometriesWithNewGraphics(self.routeLayer.graphics, projectedPolylines);
+					projectionCompleteFunction(outFeatures);
+				}, function (error) {
+					if (typeof (projectionFailFunction === "function")) {
+						projectionFailFunction(error);
+					}
+				});
+			} else {
+				projectionCompleteFunction([]);
+			}
 		},
 
 		_create: function () {
@@ -388,6 +398,8 @@
 						var renderer;
 						map.disableDoubleClickZoom();
 
+
+
 						function setupToolbar() {
 							var mapRoot = $("[id$=root]", self.element);
 							// Create toolbar & buttons.
@@ -469,6 +481,26 @@
 
 
 						setupToolbar();
+
+						// Add initial graphics if provided
+						if (self.options.initialGraphics && self.options.initialGraphics.length > 0) {
+							(function (graphics) {
+								var i, l, graphic;
+								for (i = 0, l = graphics.length; i < l; i += 1) {
+									try {
+										graphic = graphics[i];
+										graphic = new esri.Graphic(graphic);
+										if (graphic.geoemtry.type === "polyline") {
+											self.routeLayer.add(graphic);
+										}
+									} catch (e) {
+										if (console !== undefined) {
+											console.error(["Error adding initial graphic #", i, "."].join(""), e);
+										}
+									}
+								}
+							} (self.options.initialGraphics));
+						}
 					}
 				});
 			}
