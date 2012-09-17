@@ -1,10 +1,6 @@
 ﻿/** Copyright 2012 Washington State Department of Transportation.  Licensed under The MIT License (http://opensource.org/licenses/MIT). **/
 /*global esri, dojo, jQuery*/
 /*jslint nomen: true, regexp: true, white:true */
-////dojo.require("esri.symbol");
-////dojo.require("esri.graphic");
-////dojo.require("esri.tasks.route");
-////dojo.require("esri.tasks.geometry");
 /// <reference path="jsapi_vsdoc_v31.js" />
 
 
@@ -509,6 +505,7 @@
 			dojo.require("esri.graphic");
 			dojo.require("esri.tasks.route");
 			dojo.require("esri.tasks.geometry");
+			dojo.require("ogc.SimpleGeometry");
 
 			dojo.addOnLoad(function () {
 				init();

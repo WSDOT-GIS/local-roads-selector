@@ -55,9 +55,16 @@
     <Content Include="reverseGeocode.html" />
     <Content Include="scripts\arcGisMap.js" />
     <None Include="README.md" />
+    <Content Include="scripts\clientProjection.js" />
     <Content Include="scripts\graphicInfoTable.js" />
     <Content Include="scripts\localRoadsSelector.js" />
-    <Content Include="scripts\OgcSimpleGeometry.js" />
+    <Content Include="scripts\ogc\SimpleGeometry.js" />
+    <Content Include="scripts\proj4js\defs\EPSG2927.js" />
+    <Content Include="scripts\proj4js\defs\EPSG3857.js" />
+    <Content Include="scripts\proj4js\defs\EPSG900913.js" />
+    <Content Include="scripts\proj4js\defs\GOOGLE.js" />
+    <Content Include="scripts\proj4js\proj4js-combined.js" />
+    <Content Include="scripts\proj4js\proj4js-compressed.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
