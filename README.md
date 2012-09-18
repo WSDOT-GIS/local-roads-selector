@@ -6,6 +6,9 @@ This widget provides a map from which a user can select road segments.  A segmen
 ## License ##
 This code is licensed under [The MIT License](http://opensource.org/licenses/MIT).  See the `LICENSE` file for details.
 
+## Acknowledgements ##
+* [Proj4js](https://github.com/bewest/proj4js): This is used to perform client side map projections.
+
 ## Setup ##
 1. Place the following into your page's `<head>`
 ```html
