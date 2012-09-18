@@ -44,7 +44,6 @@ This code is licensed under [The MIT License](http://opensource.org/licenses/MIT
 			$("#map").localRoadsSelector({
 				reverseGeocodeHandlerUrl: "../ReverseGeocodeIntersection.ashx",
 				routeTaskUrl: "http://tasks.arcgisonline.com/ArcGIS/rest/services/NetworkAnalysis/ESRI_Route_NA/NAServer/Route",
-				geometryServiceUrl: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 				layers: [
 					{
 						url: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/",
@@ -70,9 +69,6 @@ Since the [ArcGIS REST API](http://resources.arcgis.com/en/help/rest/apiref/) do
 
 ### *routeTaskUrl* ###
 REST URL for a [network layer](http://resources.arcgis.com/en/help/rest/apiref/index.html?nalayer.html).
-
-### *geometryServiceUrl* ###
-REST URL for a [geoemtry service](http://resources.arcgis.com/en/help/rest/apiref/index.html?geometryserver.html).
 
 ### *resizeWithWindow* ###
 Set to `true` to call the map's [resize](http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/map.htm#resize) function when the browser window is resized.  Set to `false` otherwise.
