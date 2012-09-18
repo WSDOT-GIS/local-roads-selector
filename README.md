@@ -16,8 +16,23 @@ This code is licensed under [The MIT License](http://opensource.org/licenses/MIT
 ```html
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js"></script>
+<script>
+	// Setup custom dojo package paths.
+	var dojoConfig = {
+		packages: [
+			{
+				"name": "ogc",
+				"location": location.pathname.replace(/\/[^/]+$/, "") + "/scripts/ogc"
+			}
+		]
+	};
+</script>
 <script type="text/javascript" src="//serverapi.arcgisonline.com/jsapi/arcgis/?v=3.1compact"></script>
 <script src="../Scripts/arcGisMap.js"></script>
+<script src="scripts/proj4js/proj4js-compressed.js" type="text/javascript"></script>
+<script src="scripts/proj4js/defs/EPSG2927.js" type="text/javascript"></script>
+<script src="scripts/proj4js/defs/EPSG3857.js" type="text/javascript"></script>
+<script src="scripts/clientProjection.js" type="text/javascript"></script>
 <script src="../Scripts/localRoadsSelector.js"></script>
 ```
 

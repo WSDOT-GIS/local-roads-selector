@@ -93,7 +93,6 @@
 		options: {
 			reverseGeocodeHandlerUrl: "../ReverseGeocodeIntersection.ashx",
 			routeTaskUrl: "http://tasks.arcgisonline.com/ArcGIS/rest/services/NetworkAnalysis/ESRI_Route_NA/NAServer/Route",
-			geometryServiceUrl: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 			layers: [
 					{
 						url: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/",
@@ -190,7 +189,6 @@
 			this._setTooltipStart();
 			return this;
 		},
-		_geometryServiceTask: null,
 		_triggerIntersectionFound: function (graphic) {
 			this._trigger("intersectionFound", this, graphic);
 		},
@@ -230,9 +228,6 @@
 			self._setTooltipStart();
 
 			function init() {
-				// Initialize the geometry service task.
-				self._geometryServiceTask = new esri.tasks.GeometryService(self.options.geometryServiceUrl);
-
 				function toEsriSpatialReference(srInput) {
 					var type = typeof (srInput), output;
 					// Initialize the output spatial reference.
@@ -349,7 +344,7 @@
 											self._hideBusyDialog();
 											self._showMessage(message, "Error finding route");
 											/*jslint devel:true*/
-											if (console !== undefined) {
+											if (console !== undefined && console.error !== undefined) {
 												console.error(error);
 											}
 											/*jslint devel:false*/
