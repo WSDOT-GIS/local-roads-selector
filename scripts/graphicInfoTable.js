@@ -41,8 +41,8 @@
 			var $this = this, i, l, graphic, graphics, list;
 
 			list = $this.element;
-			if (!/^[ol]l$/i.exec(list.localName)) {
-				throw new Error("element must be li or ol");
+			if (!/^[ou]l$/i.exec(list.localName)) {
+				throw new Error("element must be ul or ol");
 			}
 
 			graphics = $this.options.initialGraphics;

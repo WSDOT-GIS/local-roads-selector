@@ -12,29 +12,6 @@
 		return new Date().getTime();
 	}
 
-	function copyGeometriesWithNewGraphics(graphics, geometries) {
-		/// <summary>Creates copies of the input graphics.  The geometries will of the copies be replaced with those from "geometries"</summary>
-		/// <param name="graphics" type="esri.Graphic[]">An array of graphics.</param>
-		/// <param name="geometries" type="esri.geometry.Geometry[]">An array of geometries.</param>
-		/// <returns type="esri.Graphic[]" />
-		var output, i, l, graphic;
-		output = [];
-		if (graphics.length !== geometries.length) {
-			throw new Error('The "graphics" and "geometries" arrays should have the same number of elements."');
-		}
-
-		for (i = 0, l = graphics.length; i < l; i += 1) {
-			graphic = graphics[i].toJson();
-			graphic.geometry = geometries[i];
-			if (esri) {
-				graphic = new esri.Graphic(graphic);
-			}
-			output.push(graphic);
-		}
-
-		return output;
-	}
-
 	function splitRouteName(routeName) {
 		/// <summary>Splits a route name into its four component street names.</summary>
 		/// <returns type="Object">An object with the following properties: main, start, and end.</returns>
@@ -198,7 +175,7 @@
 		getRoutes: function () {
 			/// <summary>Create projected copies of route polyline graphics and return them in an array</summary>
 			/// <returns type="esri.Graphic[]" />
-			var self = this, routeGeometries, output, projector, i, l, graphic, geometry;
+			var self = this, output, projector;
 			// routeGeometries = self.routeLayer.graphics.length > 0 ? esri.getGeometries(self.routeLayer.graphics) : [];
 
 			projector = new Proj4js.EsriProjector(new Proj4js.Proj("GOOGLE"), new Proj4js.Proj("EPSG:2927"));
@@ -215,12 +192,56 @@
 				}
 
 				// Add a property for the OGC Simple Geometry.
-				graphic.attributes.ogcSimpleGeometry = new ogc.SimpleGeometry(graphic.geometry);
+				graphic.attributes.ogcSimpleGeometry = new ogc.SimpleGeometry(graphic.geometry, null, true);
 			});
 
 			return output;
 		},
+		addRoute: function (route) {
+			if (route) {
+				this.addRoutes([route]);
+			}
+			return this;
+		},
+		addRoutes: function (routes) {
+			/// <summary>Adds an array of route graphics to the route graphics layer.</summary>
+			/// <param name="routes" type="esri.Graphic[]">An array of route graphics.</param>
+			/// <returns type="jQuery" />
+			var self = this, i, l, graphic, layer, geometry, error;
+			layer = self.routeLayer;
+			for (i = 0, l = routes.length; i < l; i += 1) {
+				error = null;
+				graphic = routes[i];
+				if (!graphic.geometry) {  // If graphic does not have geometry...
 
+					if (graphic.attributes.simpleGeometry) {
+						if (graphic.attributes.simpleGeometry.isInstanceof !== undefined && graphic.attributes.simpleGeometry.isInstanceOf(ogc.SimpleGeometry)) {
+							geometry = graphic.attributes.simpleGeometry.toEsriGeometry();
+							if (graphic.setGeometry !== undefined) {
+								graphic.setGeometry(geometry);
+							} else {
+								graphic.geometry = geometry;
+							}
+						} else {
+							// TODO: Trigger error event.
+							error = new Error("Graphic does not have geometry.  simpleGeometry attribute is incorrect type.");
+						}
+					} else {
+						// TODO: Trigger error event.
+						error = new Error("Graphic has neither geometry nor simpleGeometry attribute.");
+					}
+
+					if (!error) {
+						if (typeof (graphic.isInstanceOf) !== "function" || !graphic.isInstanceOf(esri.Graphic)) {
+							graphic = new esri.Graphic(graphic);
+						}
+
+						layer.add(graphic);
+					}
+				}
+			}
+			return this;
+		},
 		_create: function () {
 			var self = this, startSymbol, defaultSymbol, endSymbol, routeSymbol, routeTask, locationId = createLocationId();
 
