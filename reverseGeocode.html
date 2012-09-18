@@ -42,7 +42,6 @@
 	<div id="debugSection">
 		<h2>Debug</h2>
 		<p>These buttons will send information to the debug console.</p>
-		<button id="getIntersectionsButton" title="Sends intersection graphics to the debug console.">Get Intersections</button>
 		<button id="getRoutesButton" title="Sends route graphics to the debug console.">Get Routes</button>
 	</div>
 	
@@ -92,24 +91,16 @@
 					resizeWithWindow: false
 				});
 
-				if (typeof(console) !== "undefined" && typeof(console.debug) === "function") {
+				if (console !== undefined && typeof (console.log) === "function") {
 					debugButtons.button();
-					$("#getIntersectionsButton").click(function (evt) {
-						var intersections = $("#map").localRoadsSelector("getIntersections", function (intersections) {
-							console.debug(intersections);
-						}, function (error) {
-							console.debug("Projection failed", error);
-						});
-
-					});
 
 					$("#getRoutesButton").click(function (evt) {
-						var intersections = $("#map").localRoadsSelector("getRoutes", function (intersections) {
-							console.debug(intersections);
-						}, function (error) {
-							console.debug("Projection failed", error);
-						});
-
+						var routes = $("#map").localRoadsSelector("getRoutes");
+						if (routes !== null && routes.length > 0) {
+							console.log(routes);
+						} else {
+							console.log("No routes have been defined.");
+						}
 					});
 				} else {
 					debugButtons.attr("disabled", true);

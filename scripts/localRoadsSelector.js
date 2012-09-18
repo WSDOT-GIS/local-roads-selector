@@ -1,7 +1,8 @@
 ﻿/** Copyright 2012 Washington State Department of Transportation.  Licensed under The MIT License (http://opensource.org/licenses/MIT). **/
-/*global esri, dojo, jQuery*/
+/*global esri, dojo, jQuery, Proj4js, ogc*/
 /*jslint nomen: true, regexp: true, white:true */
 /// <reference path="jsapi_vsdoc_v31.js" />
+/// <reference path="ogc/ogcSimpleGeometry.vsdoc.js" />
 
 
 (function ($) {
@@ -196,41 +197,30 @@
 		_triggerRouteFound: function (graphic) {
 			this._trigger("routeFound", this, graphic);
 		},
-		getIntersections: function (projectionCompleteFunction, projectionFailFunction) {
-			// Create projected copies of intersection point graphics and return them in an array.
-			var self = this, stopGeometries;
-			stopGeometries = self.stopsLayer.graphics.length < 1 ? [] : esri.getGeometries(self.stopsLayer.graphics);
+		getRoutes: function () {
+			/// <summary>Create projected copies of route polyline graphics and return them in an array</summary>
+			/// <returns type="esri.Graphic[]" />
+			var self = this, routeGeometries, output, projector, i, l, graphic, geometry;
+			// routeGeometries = self.routeLayer.graphics.length > 0 ? esri.getGeometries(self.routeLayer.graphics) : [];
 
-			if (stopGeometries.length > 0) {
-				self._geometryServiceTask.project(stopGeometries, self.options.eventSpatialReference, function (projectedPoints) {
-					var outFeatures = copyGeometriesWithNewGraphics(self.stopsLayer.graphics, projectedPoints);
-					projectionCompleteFunction(outFeatures);
-				}, function (error) {
-					if (typeof (projectionFailFunction === "function")) {
-						projectionFailFunction(error);
-					}
-				});
-			} else {
-				projectionCompleteFunction([]);
-			}
-		},
-		getRoutes: function (projectionCompleteFunction, projectionFailFunction) {
-			// Create projected copies of route polyline graphics and return them in an array.
-			var self = this, routeGeometries;
-			routeGeometries = self.routeLayer.graphics.length > 0 ? esri.getGeometries(self.routeLayer.graphics) : [];
+			projector = new Proj4js.EsriProjector(new Proj4js.Proj("GOOGLE"), new Proj4js.Proj("EPSG:2927"));
 
-			if (routeGeometries.length > 0) {
-				self._geometryServiceTask.project(routeGeometries, self.options.eventSpatialReference, function (projectedPolylines) {
-					var outFeatures = copyGeometriesWithNewGraphics(self.routeLayer.graphics, projectedPolylines);
-					projectionCompleteFunction(outFeatures);
-				}, function (error) {
-					if (typeof (projectionFailFunction === "function")) {
-						projectionFailFunction(error);
+			output = projector.projectGraphics(self.routeLayer.graphics, function (graphic) {
+				var removeRe, name;
+
+				// Remove unwanted properties.
+				removeRe = /(?:(?:(?:First)|(?:Last))StopId)|(?:ObjectId)|(?:StopCount)/i;
+				for (name in graphic.attributes) {
+					if (graphic.attributes.hasOwnProperty(name) && removeRe.test(name)) {
+						delete graphic.attributes[name];
 					}
-				});
-			} else {
-				projectionCompleteFunction([]);
-			}
+				}
+
+				// Add a property for the OGC Simple Geometry.
+				graphic.attributes.ogcSimpleGeometry = new ogc.SimpleGeometry(graphic.geometry);
+			});
+
+			return output;
 		},
 
 		_create: function () {

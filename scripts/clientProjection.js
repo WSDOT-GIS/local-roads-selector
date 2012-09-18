@@ -65,7 +65,7 @@
 
 		// Set the spatialReference property if the input geometry had this property defined...
 		if (geometry.spatialReference) {
-			output.spatialReference = { wkid: destPrj.srsProjNumber };
+			output.spatialReference = { wkid: Number(destPrj.srsProjNumber) };
 		}
 
 		// Convert the output object into an esri.Geometry if that class is available.
@@ -99,5 +99,53 @@
 		return projectEsriGeometry(geometry, this.inputProj, this.outputProj);
 	};
 
+	Projector.prototype.projectGeometries = function (geometries) {
+		/// <summary>Projects an array of geometries.  Does not modify original array.</summary>
+		/// <param name="geometries" type="esri.geometry.Geometry[]">An array of geometries.</param>
+		/// <returns type="esri.geometry.Geometry[]" />
+
+		var output = [], i, l, inGeometry, outGeometry;
+
+		for (i = 0, l = geometries.length; i < l; i += 1) {
+			inGeometry = geometries[i];
+			outGeometry = this.project(geometry);
+			output.push(outGeometry);
+		}
+
+		return output;
+	}
+
+	Projector.prototype.projectGraphics = function (graphics, perGraphicFunction) {
+		/// <summary>Projects the geometries in an array of graphics.  Does not modify the original array.</summary>
+		/// <param name="graphics" type="esri.Graphic[]">An array of graphics.</param>
+		/// <param name="perGraphicFunction" type="function">
+		/// Optional.  A function that will be executed for each graphic.  This function takes a single esri.Graphic parameter.
+		/// </param>
+		/// <returns type="esri.Graphic[]" />
+
+		var output, inGraphic, outGraphic, i, l, perGraphicDefined = typeof (perGraphicFunction) === "function";
+
+		if (graphics !== null && graphics !== undefined) {
+			output = [];
+			if (graphics.length) {
+				for (i = 0, l = graphics.length; i < l; i += 1) {
+					inGraphic = graphics[i];
+					outGraphic = inGraphic.toJson();
+					if (outGraphic.geometry) {
+						outGraphic.geometry = this.project(outGraphic.geometry);
+					}
+					outGraphic = new esri.Graphic(outGraphic);
+					if (perGraphicDefined) {
+						perGraphicFunction(outGraphic);
+					}
+
+					output.push(outGraphic);
+				}
+			}
+		}
+
+		return output;
+	}
+
 	Proj4js.EsriProjector = Projector;
-}());
+} ());

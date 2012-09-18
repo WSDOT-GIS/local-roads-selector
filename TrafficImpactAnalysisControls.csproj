@@ -57,7 +57,9 @@
     <None Include="README.md" />
     <Content Include="scripts\clientProjection.js" />
     <Content Include="scripts\graphicInfoTable.js" />
+    <Content Include="scripts\jsapi_vsdoc_v31.js" />
     <Content Include="scripts\localRoadsSelector.js" />
+    <Content Include="scripts\ogc\ogcSimpleGeometry.vsdoc.js" />
     <Content Include="scripts\ogc\SimpleGeometry.js" />
     <Content Include="scripts\proj4js\defs\EPSG2927.js" />
     <Content Include="scripts\proj4js\defs\EPSG3857.js" />
