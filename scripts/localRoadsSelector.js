@@ -131,9 +131,6 @@
 						type: "esri.layers.ArcGISTiledMapServiceLayer"
 					}
 			],
-			// This will be used to have routes and segments already on the map.  This should be JSON that can be used to initialize a feature set.
-			initialGraphics: null,
-
 			eventSpatialReference: 2927, // When events are triggered, this is the spatial reference they will be projected to.
 			resizeWithWindow: true
 		},
@@ -231,7 +228,6 @@
 			/// <summary>Create projected copies of route polyline graphics and return them in an array</summary>
 			/// <returns type="esri.Graphic[]" />
 			var self = this, output, projector;
-			// routeGeometries = self.routeLayer.graphics.length > 0 ? esri.getGeometries(self.routeLayer.graphics) : [];
 
 			projector = new Proj4js.EsriProjector(new Proj4js.Proj("EPSG:3857"), new Proj4js.Proj("EPSG:2927"));
 
@@ -426,7 +422,7 @@
 					layers: self.options.layers,
 					resizeWithWindow: self.options.resizeWithWindow,
 					mapLoad: function (event, map) {
-						var renderer;
+						var renderer, selectedRouteSymbol;
 						map.disableDoubleClickZoom();
 
 
@@ -457,6 +453,7 @@
 						defaultSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color("yellow"));
 						endSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color("red"));
 						routeSymbol = new esri.symbol.SimpleLineSymbol().setWidth(5).setColor(new dojo.Color("#5555ff"));
+						selectedRouteSymbol = new esri.symbol.SimpleLineSymbol().setWidth(6).setColor(new dojo.Color("#ffff00"));
 
 						// Setup the stops layer.
 						self.stopsLayer = new esri.layers.GraphicsLayer({
@@ -490,6 +487,17 @@
 						map.addLayer(self.routeLayer);
 						map.addLayer(self.stopsLayer);
 
+						// Add route layer events.
+						dojo.connect(self.routeLayer, "onMouseOver", function (event) {
+							var graphic = event.graphic;
+							graphic.setSymbol(selectedRouteSymbol);
+						});
+
+						dojo.connect(self.routeLayer, "onMouseOut", function (event) {
+							var graphic = event.graphic;
+							graphic.setSymbol(null);
+						});
+
 
 						dojo.connect(map, "onClick", handleMapClick);
 						dojo.connect(map, "onDblClick", handleMapClick);
@@ -512,26 +520,6 @@
 
 
 						setupToolbar();
-
-						// Add initial graphics if provided
-						if (self.options.initialGraphics && self.options.initialGraphics.length > 0) {
-							(function (graphics) {
-								var i, l, graphic;
-								for (i = 0, l = graphics.length; i < l; i += 1) {
-									try {
-										graphic = graphics[i];
-										graphic = new esri.Graphic(graphic);
-										if (graphic.geoemtry.type === "polyline") {
-											self.routeLayer.add(graphic);
-										}
-									} catch (e) {
-										if (console !== undefined) {
-											console.error(["Error adding initial graphic #", i, "."].join(""), e);
-										}
-									}
-								}
-							} (self.options.initialGraphics));
-						}
 					}
 				});
 			}
