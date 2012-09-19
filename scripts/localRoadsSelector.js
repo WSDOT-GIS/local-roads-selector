@@ -131,7 +131,6 @@
 						type: "esri.layers.ArcGISTiledMapServiceLayer"
 					}
 			],
-			eventSpatialReference: 2927, // When events are triggered, this is the spatial reference they will be projected to.
 			resizeWithWindow: true
 		},
 		_showMessage: function (message, title) {
@@ -268,161 +267,144 @@
 			return this;
 		},
 		_create: function () {
-			var self = this, startSymbol, defaultSymbol, endSymbol, routeSymbol, routeTask, locationId = createLocationId();
+			var self = this, startSymbol, defaultSymbol, endSymbol, routeSymbol, routeTask, selectedRouteSymbol, locationId = createLocationId();
 
 			self._tooltip = $("<div>").addClass("ui-local-roads-selector-tooltip").hide().appendTo("body");
 			self._setTooltipStart();
 
 			function init() {
-				function toEsriSpatialReference(srInput) {
-					var type = typeof (srInput), output;
-					// Initialize the output spatial reference.
-					if (type === "number") {
-						output = new esri.SpatialReference({
-							wkid: srInput
-						});
-					} else if (type === "string") {
-						output = new esri.SpatialReference({
-							wkt: srInput
-						});
-					} else if ((type === "object") && (srInput.isInstanceOf === undefined || !srInput.isInstanceOf(esri.SpatialReference))) {
-						output = new esri.SpatialReference(srInput);
-					}
-
-					return output;
-				}
-
-				self.options.eventSpatialReference = toEsriSpatialReference(self.options.eventSpatialReference);
-
 				function handleMapClick(event) {
 					var location, prevGraphic, locationEnd = event.type === "dblclick";
 
-					location = String(event.mapPoint.x) + "," + String(event.mapPoint.y);
+					if (!event.graphic) { // If we are clicking on a graphic, we do not want to search for an intersection.
+
+						location = String(event.mapPoint.x) + "," + String(event.mapPoint.y);
 
 
 
-					self._showBusyDialog("Searching for intersection...");
+						self._showBusyDialog("Searching for intersection...");
 
-					(function (isLastStop) {
-						$.get(self.options.reverseGeocodeHandlerUrl, {
-							location: location,
-							inSR: 102100,
-							distance: "10",
-							outSR: 102100
-						}, function (data, textStatus) {
-							var graphic, routeParams;
-							if (textStatus === "success") {
-								self._setTooltipNext();
-								if (data.address && data.location) {
-									//// graphic = new esri.Graphic(esri.geometry.fromJson(data.location), startSymbol, data.address, new esri.InfoTemplate("Address", "${Street}<br />${City}, ${State}  ${ZIP}"));
-									graphic = new esri.Graphic({
-										geometry: esri.geometry.fromJson(data.location),
-										attributes: data.address
-									});
-									graphic.attributes.Name = graphic.attributes.Street;
-									// graphic.attributes.locationId = locationId;
+						(function (isLastStop) {
+							$.get(self.options.reverseGeocodeHandlerUrl, {
+								location: location,
+								inSR: 102100,
+								distance: "10",
+								outSR: 102100
+							}, function (data, textStatus) {
+								var graphic, routeParams;
+								if (textStatus === "success") {
+									self._setTooltipNext();
+									if (data.address && data.location) {
+										//// graphic = new esri.Graphic(esri.geometry.fromJson(data.location), startSymbol, data.address, new esri.InfoTemplate("Address", "${Street}<br />${City}, ${State}  ${ZIP}"));
+										graphic = new esri.Graphic({
+											geometry: esri.geometry.fromJson(data.location),
+											attributes: data.address
+										});
+										graphic.attributes.Name = graphic.attributes.Street;
+										// graphic.attributes.locationId = locationId;
 
-									// If no stops have been defined yet, this is the start graphic.  Otherwise its the end graphic.
-									graphic.attributes.position = self.stopsLayer.graphics.length === 0 ? "start" : "end";
+										// If no stops have been defined yet, this is the start graphic.  Otherwise its the end graphic.
+										graphic.attributes.position = self.stopsLayer.graphics.length === 0 ? "start" : "end";
 
-									self.stopsLayer.add(graphic);
+										self.stopsLayer.add(graphic);
 
-									// Trigger the intersection found event.
-									self._triggerIntersectionFound(graphic);
+										// Trigger the intersection found event.
+										self._triggerIntersectionFound(graphic);
 
-									if (self.stopsLayer.graphics.length >= 2) {
-										self._showBusyDialog("Searching for route...");
-										// The the second to last graphic.
-										prevGraphic = self.stopsLayer.graphics[self.stopsLayer.graphics.length - 2];
+										if (self.stopsLayer.graphics.length >= 2) {
+											self._showBusyDialog("Searching for route...");
+											// The the second to last graphic.
+											prevGraphic = self.stopsLayer.graphics[self.stopsLayer.graphics.length - 2];
 
-										// If the previous graphic also is set as an "end" point, clear this attribute.
-										if (prevGraphic.attributes.position === "end") {
-											prevGraphic.attributes.position = null;
-										}
-										// Initialize the route task.
-										if (!routeTask) {
-											routeTask = new esri.tasks.RouteTask(self.options.routeTaskUrl);
-										}
-										routeParams = new esri.tasks.RouteParameters();
-										routeParams.stops = new esri.tasks.FeatureSet();
-										routeParams.stops.features.push(prevGraphic);
-										routeParams.stops.features.push(graphic);
-										routeParams.stops.geometryType = "point";
-										// routeParams.impedanceAttribute = "Length";
-										routeParams.restrictionAttributes = ["none"]; // Ignore one-way streets.
-										routeParams.returnRoutes = true;
-										routeParams.returnDirections = false;
-										routeParams.directionLengthUnits = esri.Units.MILES;
-										// TODO: Get spatial reference from map instead of creating a new object.
-										routeParams.outSpatialReference = new esri.SpatialReference({ wkid: 102100 });
+											// If the previous graphic also is set as an "end" point, clear this attribute.
+											if (prevGraphic.attributes.position === "end") {
+												prevGraphic.attributes.position = null;
+											}
+											// Initialize the route task.
+											if (!routeTask) {
+												routeTask = new esri.tasks.RouteTask(self.options.routeTaskUrl);
+											}
+											routeParams = new esri.tasks.RouteParameters();
+											routeParams.stops = new esri.tasks.FeatureSet();
+											routeParams.stops.features.push(prevGraphic);
+											routeParams.stops.features.push(graphic);
+											routeParams.stops.geometryType = "point";
+											// routeParams.impedanceAttribute = "Length";
+											routeParams.restrictionAttributes = ["none"]; // Ignore one-way streets.
+											routeParams.returnRoutes = true;
+											routeParams.returnDirections = false;
+											routeParams.directionLengthUnits = esri.Units.MILES;
+											// TODO: Get spatial reference from map instead of creating a new object.
+											routeParams.outSpatialReference = new esri.SpatialReference({ wkid: 102100 });
 
-										routeTask.solve(routeParams, function (solveResults) {
-											var route, segParts;
-											if (solveResults && solveResults.routeResults !== undefined) {
-												if (solveResults.routeResults.length) {
-													route = solveResults.routeResults[0].route;
-													// Add a spatial reference to the geometry.
-													route.geometry.setSpatialReference(routeParams.outSpatialReference);
-													route.attributes.locationId = locationId;
+											routeTask.solve(routeParams, function (solveResults) {
+												var route, segParts;
+												if (solveResults && solveResults.routeResults !== undefined) {
+													if (solveResults.routeResults.length) {
+														route = solveResults.routeResults[0].route;
+														// Add a spatial reference to the geometry.
+														route.geometry.setSpatialReference(routeParams.outSpatialReference);
+														route.attributes.locationId = locationId;
 
-													segParts = splitRouteName(route.attributes.Name);
-													if (segParts) {
-														if (segParts instanceof Array) {
-															route.attributes.parts = segParts;
-														} else {
-															route.attributes.Name = [segParts.main, "from", segParts.start, "to", segParts.end].join(" ");
+														segParts = splitRouteName(route.attributes.Name);
+														if (segParts) {
+															if (segParts instanceof Array) {
+																route.attributes.parts = segParts;
+															} else {
+																route.attributes.Name = [segParts.main, "from", segParts.start, "to", segParts.end].join(" ");
+															}
+														}
+
+
+														self.routeLayer.add(route);
+														self._triggerRouteFound(route);
+														if (isLastStop) {
+															self._setTooltipStart();
+															self.stopsLayer.clear();
+															locationId = createLocationId();
 														}
 													}
-
-
-													self.routeLayer.add(route);
-													self._triggerRouteFound(route);
-													if (isLastStop) {
-														self._setTooltipStart();
-														self.stopsLayer.clear();
-														locationId = createLocationId();
-													}
 												}
-											}
+												self._hideBusyDialog();
+											}, function (error) {
+												var message = typeof (error) === "string" ? error : typeof (error) === "object" && error.message !== undefined ? error.message : "An error has occurred finding the route location.";
+												self._hideBusyDialog();
+												self._showMessage(message, "Error finding route");
+												/*jslint devel:true*/
+												if (console !== undefined && console.error !== undefined) {
+													console.error(error);
+												}
+												/*jslint devel:false*/
+											});
+										} else {
 											self._hideBusyDialog();
-										}, function (error) {
-											var message = typeof (error) === "string" ? error : typeof (error) === "object" && error.message !== undefined ? error.message : "An error has occurred finding the route location.";
-											self._hideBusyDialog();
-											self._showMessage(message, "Error finding route");
-											/*jslint devel:true*/
-											if (console !== undefined && console.error !== undefined) {
-												console.error(error);
-											}
-											/*jslint devel:false*/
-										});
-									} else {
-										self._hideBusyDialog();
+										}
+
+
+
+
+										self.stopsLayer.refresh();
 									}
-
-
-
-
-									self.stopsLayer.refresh();
+									else {
+										self._hideBusyDialog();
+										self._showMessage("No intersections found at this location.");
+									}
+								} else {
+									if (console !== undefined) {
+										console.error(textStatus, data);
+									}
 								}
-								else {
-									self._hideBusyDialog();
-									self._showMessage("No intersections found at this location.");
-								}
-							} else {
-								if (console !== undefined) {
-									console.error(textStatus, data);
-								}
-							}
-						}, "json");
-					} (locationEnd));
+							}, "json");
+						} (locationEnd));
+					}
 				}
 
 
 				$(self.element).arcGisMap({
 					layers: self.options.layers,
 					resizeWithWindow: self.options.resizeWithWindow,
-					mapLoad: function (event, map) {
-						var renderer, selectedRouteSymbol;
+					mapLoad: function (event, map) { // The event parameter, although not used, is necessary to match the event handler signature.  (The map parameter comes second, so another parameter needs to precede it even if it is not used.)
+						var renderer;
 						map.disableDoubleClickZoom();
 
 
@@ -453,7 +435,7 @@
 						defaultSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color("yellow"));
 						endSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color("red"));
 						routeSymbol = new esri.symbol.SimpleLineSymbol().setWidth(5).setColor(new dojo.Color("#5555ff"));
-						selectedRouteSymbol = new esri.symbol.SimpleLineSymbol().setWidth(6).setColor(new dojo.Color("#ffff00"));
+						selectedRouteSymbol = new esri.symbol.SimpleLineSymbol().setWidth(5).setColor(new dojo.Color("#ffff00"));
 
 						// Setup the stops layer.
 						self.stopsLayer = new esri.layers.GraphicsLayer({
@@ -479,25 +461,29 @@
 						self.routeLayer = new esri.layers.GraphicsLayer({
 							id: "route"
 						});
-						renderer = new esri.renderer.SimpleRenderer(routeSymbol);
+
+						renderer = new esri.renderer.UniqueValueRenderer(routeSymbol, "selected");
+						renderer.addValue({
+							value: true,
+							symbol: selectedRouteSymbol
+						});
 						self.routeLayer.setRenderer(renderer);
-						self.routeLayer.setInfoTemplate(new esri.InfoTemplate("Route", "${Name}"));
+						// self.routeLayer.setInfoTemplate(new esri.InfoTemplate("Route", "${Name}"));
+						// self.routeLayer.enableMouseEvents();
 
 						// Add the layers to the map.
 						map.addLayer(self.routeLayer);
 						map.addLayer(self.stopsLayer);
 
-						// Add route layer events.
-						dojo.connect(self.routeLayer, "onMouseOver", function (event) {
-							var graphic = event.graphic;
-							graphic.setSymbol(selectedRouteSymbol);
+						dojo.connect(self.routeLayer, "onClick", function (event) {
+							var graphic = event.graphic, layer = graphic.getLayer(), attr = graphic.attributes;
+							if (attr.selected) {
+								delete attr.selected;
+							} else {
+								attr.selected = true;
+							}
+							layer.refresh();
 						});
-
-						dojo.connect(self.routeLayer, "onMouseOut", function (event) {
-							var graphic = event.graphic;
-							graphic.setSymbol(null);
-						});
-
 
 						dojo.connect(map, "onClick", handleMapClick);
 						dojo.connect(map, "onDblClick", handleMapClick);
