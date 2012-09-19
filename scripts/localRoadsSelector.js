@@ -113,11 +113,6 @@
 		return graphic;
 	}
 
-
-
-
-	$.fn.splitRouteName = splitRouteName;
-
 	$.widget("ui.localRoadsSelector", {
 		options: {
 			reverseGeocodeHandlerUrl: "/ReverseGeocodeIntersection.ashx",
@@ -183,6 +178,8 @@
 			this._tooltip.html("Click another intersection to draw a route.<br/>Double-click an intersection to end.");
 		},
 		deleteLastSegment: function () {
+			/// <summary>Deletes the last route graphic that was added to the map.</summary>
+			/// <returns type="jQuery" />
 			var gfx;
 			function deleteLastGraphic(layer) {
 				/// <summary>Deletes the last graphic in the graphics array of a layer.</summary>
@@ -209,6 +206,8 @@
 			return this;
 		},
 		clearSegments: function () {
+			/// <summary>Deletes all graphics from the map.</summary>
+			/// <returns type="jQuery" />
 			this.stopsLayer.clear();
 			this.routeLayer.clear();
 			this._setTooltipStart();
@@ -262,6 +261,7 @@
 		addRoute: function (route) {
 			/// <summary>Adds a route graphic to the route layer utilizing the addRoutes function.</summary>
 			/// <param name="route" type="esri.Graphic">A graphic representing a route.</param>
+			/// <returns type="jQuery" />
 
 			// Use the addRoutes method, which handles input route graphics that might need to be modified before adding to the route layer.
 			if (route) {
@@ -283,6 +283,9 @@
 			return this;
 		},
 		deleteRoutes: function (routes) {
+			/// <summary>Deletes route graphics from the map.</summary>
+			/// <param name="routes" type="esri.Graphic[]">An array of route graphics.</param>
+			/// <returns type="jQuery" />
 			var self = this, i, l, graphic, layer;
 			layer = self.routeLayer;
 			for (i = 0, l = routes.length; i < l; i += 1) {
@@ -292,10 +295,15 @@
 			return this;
 		},
 		deleteRoute: function (route) {
+			/// <summary>Deletes a route graphic from the map.</summary>
+			/// <param name="route" type="esri.Graphic">A route graphic.</param>
+			/// <returns type="jQuery" />
 			this.routeLayer.remove(route);
 			return this;
 		},
 		removeSelectedRoutes: function () {
+			/// <summary>Removes from the map all routes that are currently selected.</summary>
+			/// <returns type="jQuery" />
 			var routes = this.getSelectedRoutes();
 			/*jslint eqeq: true */
 			if (routes != null && routes.length > 0) {
@@ -305,6 +313,14 @@
 			return this;
 		},
 		_create: function () {
+			/// <summary>A jQuery widget that allows a user to select local road segments by clicking on intersections.</summary>
+			/// <param name="options" type="object">
+			/// <para>Options</para>
+			/// <para>reverseGeocodeHandlerUrl:	The path to the ReverseGeocodeIntersection.ashx file.</para>
+			/// <para>routeTaskUrl:	The URL of the ArcGIS Server route service that will be used to find a line segment between intersections.</para>
+			/// <para>layers:	Defines the layer(s) that will appear in the map.</para>
+			/// <para>resizeWithWindow: Set to true if the map should resize when the window resizes.  Set to false otherwise.
+			/// </param>
 			var self = this, startSymbol, defaultSymbol, endSymbol, routeSymbol, routeTask, selectedRouteSymbol, locationId = createLocationId();
 
 			self._tooltip = $("<div>").addClass("ui-local-roads-selector-tooltip").hide().appendTo("body");
