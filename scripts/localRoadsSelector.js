@@ -61,8 +61,21 @@
 		return streetNames;
 	}
 
-	function addGraphicToGeometry(graphic) {
+	function addGeometryToGraphic(graphic) {
+		/// <summary>Adds geometry to a graphic if it does not already have one.</summary>
 		var geometry, projector;
+
+		function projectGeometry(geometry) {
+			if (geometry.spatialReference.wkid === 2927) {
+				geometry = projector.project(geometry);
+			}
+			if (graphic.setGeometry !== undefined) {
+				graphic.setGeometry(geometry);
+			} else {
+				graphic.geometry = geometry;
+			}
+			return geometry;
+		}
 
 		projector = new Proj4js.EsriProjector(new Proj4js.Proj("EPSG:2927"), new Proj4js.Proj("EPSG:3857"));
 
@@ -78,15 +91,7 @@
 				if (graphic.attributes.ogcSimpleGeometry.isInstanceOf !== undefined && graphic.attributes.ogcSimpleGeometry.isInstanceOf(ogc.SimpleGeometry)) {
 					geometry = graphic.attributes.ogcSimpleGeometry.toEsriGeometry();
 
-					if (geometry.spatialReference.wkid === 2927) {
-						geometry = projector.project(geometry);
-					}
-
-					if (graphic.setGeometry !== undefined) {
-						graphic.setGeometry(geometry);
-					} else {
-						graphic.geometry = geometry;
-					}
+					projectGeometry(geometry);
 				} else {
 					throw new Error("Graphic does not have geometry.  ogcSimpleGeometry attribute is incorrect type.");
 				}
@@ -99,14 +104,6 @@
 			}
 		} else {
 			geometry = graphic.geometry;
-			if (geometry.spatialReference.wkid === 2927) {
-				geometry = projector.project(geometry);
-			}
-			if (graphic.setGeometry !== undefined) {
-				graphic.setGeometry(geometry);
-			} else {
-				graphic.geometry = geometry;
-			}
 
 			if (typeof (graphic.isInstanceOf) !== "function" || !graphic.isInstanceOf(esri.Graphic)) {
 				graphic = new esri.Graphic(graphic);
@@ -247,7 +244,26 @@
 
 			return output;
 		},
+		getSelectedRoutes: function () {
+			/// <summary>Deletes all of the route graphics that have been selected.  Route graphics can be selected by clicking on them.</summary>
+			/// <returns type="esri.Graphic[]" />
+			var self = this, i, l, graphic, layer, output;
+			layer = self.routeLayer;
+			output = [];
+			for (i = 0, l = self.routeLayer.graphics.length; i < l; i += 1) {
+				graphic = layer.graphics[i];
+				if (graphic.attributes.selected) {
+					output.push(graphic);
+				}
+			}
+
+			return output;
+		},
 		addRoute: function (route) {
+			/// <summary>Adds a route graphic to the route layer utilizing the addRoutes function.</summary>
+			/// <param name="route" type="esri.Graphic">A graphic representing a route.</param>
+
+			// Use the addRoutes method, which handles input route graphics that might need to be modified before adding to the route layer.
 			if (route) {
 				this.addRoutes([route]);
 			}
@@ -261,9 +277,31 @@
 			layer = self.routeLayer;
 			for (i = 0, l = routes.length; i < l; i += 1) {
 				graphic = routes[i];
-				graphic = addGraphicToGeometry(graphic);
+				graphic = addGeometryToGraphic(graphic);
 				layer.add(graphic);
 			}
+			return this;
+		},
+		deleteRoutes: function (routes) {
+			var self = this, i, l, graphic, layer;
+			layer = self.routeLayer;
+			for (i = 0, l = routes.length; i < l; i += 1) {
+				graphic = routes[i];
+				layer.remove(graphic);
+			}
+			return this;
+		},
+		deleteRoute: function (route) {
+			this.routeLayer.remove(route);
+			return this;
+		},
+		removeSelectedRoutes: function () {
+			var routes = this.getSelectedRoutes();
+			/*jslint eqeq: true */
+			if (routes != null && routes.length > 0) {
+				this.deleteRoutes(routes);
+			}
+			/*jslint eqeq: false */
 			return this;
 		},
 		_create: function () {
@@ -421,6 +459,13 @@
 								label: "Delete last segment"
 							}).click(function () {
 								self.deleteLastSegment();
+							});
+
+							// Create "Delete selected" button.
+							$("<button>").appendTo(".ui-local-roads-selector-controls").attr("title", "Delete all selected segments from the map").button({
+								label: "Delete selected"
+							}).click(function () {
+								self.removeSelectedRoutes();
 							});
 
 							// Create "Clear" button.
