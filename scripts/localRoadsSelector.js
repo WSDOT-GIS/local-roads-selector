@@ -456,7 +456,7 @@
 						startSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color("green"));
 						defaultSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color("yellow"));
 						endSymbol = new esri.symbol.SimpleMarkerSymbol().setColor(new dojo.Color("red"));
-						routeSymbol = new esri.symbol.SimpleLineSymbol();
+						routeSymbol = new esri.symbol.SimpleLineSymbol().setWidth(5).setColor(new dojo.Color("#5555ff"));
 
 						// Setup the stops layer.
 						self.stopsLayer = new esri.layers.GraphicsLayer({
