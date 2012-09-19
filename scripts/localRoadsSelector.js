@@ -61,6 +61,60 @@
 		return streetNames;
 	}
 
+	function addGraphicToGeometry(graphic) {
+		var geometry, projector;
+
+		projector = new Proj4js.EsriProjector(new Proj4js.Proj("EPSG:2927"), new Proj4js.Proj("EPSG:3857"));
+
+		if (!graphic.geometry) {  // If graphic does not have geometry...
+
+			if (graphic.attributes.ogcSimpleGeometry) {
+
+				// Ensure that ogcSimpleGeometry is an ogc.SimpleGeometry object.
+				if (graphic.attributes.ogcSimpleGeometry.isInstanceof === undefined || !graphic.attributes.ogcSimpleGeometry.isInstanceOf(ogc.SimpleGeometry)) {
+					graphic.attributes.ogcSimpleGeometry = new ogc.SimpleGeometry(graphic.attributes.ogcSimpleGeometry);
+				}
+
+				if (graphic.attributes.ogcSimpleGeometry.isInstanceOf !== undefined && graphic.attributes.ogcSimpleGeometry.isInstanceOf(ogc.SimpleGeometry)) {
+					geometry = graphic.attributes.ogcSimpleGeometry.toEsriGeometry();
+
+					if (geometry.spatialReference.wkid === 2927) {
+						geometry = projector.project(geometry);
+					}
+
+					if (graphic.setGeometry !== undefined) {
+						graphic.setGeometry(geometry);
+					} else {
+						graphic.geometry = geometry;
+					}
+				} else {
+					throw new Error("Graphic does not have geometry.  ogcSimpleGeometry attribute is incorrect type.");
+				}
+			} else {
+				throw new Error("Graphic has neither geometry nor simpleGeometry attribute.");
+			}
+
+			if (typeof (graphic.isInstanceOf) !== "function" || !graphic.isInstanceOf(esri.Graphic)) {
+				graphic = new esri.Graphic(graphic);
+			}
+		} else {
+			geometry = graphic.geometry;
+			if (geometry.spatialReference.wkid === 2927) {
+				geometry = projector.project(geometry);
+			}
+			if (graphic.setGeometry !== undefined) {
+				graphic.setGeometry(geometry);
+			} else {
+				graphic.geometry = geometry;
+			}
+
+			if (typeof (graphic.isInstanceOf) !== "function" || !graphic.isInstanceOf(esri.Graphic)) {
+				graphic = new esri.Graphic(graphic);
+			}
+		}
+
+		return graphic;
+	}
 
 
 
@@ -173,68 +227,13 @@
 		_triggerRouteFound: function (graphic) {
 			this._trigger("routeFound", this, graphic);
 		},
-		_addGraphicToGeometry: function (graphic) {
-			var geometry, projector;
-
-			projector = new Proj4js.EsriProjector(new Proj4js.Proj("EPSG:2927"), new Proj4js.Proj("EPSG:3857"));
-
-			if (!graphic.geometry) {  // If graphic does not have geometry...
-
-				if (graphic.attributes.ogcSimpleGeometry) {
-
-					// Ensure that ogcSimpleGeometry is an ogc.SimpleGeometry object.
-					if (graphic.attributes.ogcSimpleGeometry.isInstanceof === undefined || !graphic.attributes.ogcSimpleGeometry.isInstanceOf(ogc.SimpleGeometry)) {
-						graphic.attributes.ogcSimpleGeometry = new ogc.SimpleGeometry(graphic.attributes.ogcSimpleGeometry);
-					}
-
-					if (graphic.attributes.ogcSimpleGeometry.isInstanceOf !== undefined && graphic.attributes.ogcSimpleGeometry.isInstanceOf(ogc.SimpleGeometry)) {
-						geometry = graphic.attributes.ogcSimpleGeometry.toEsriGeometry();
-
-						if (geometry.spatialReference.wkid === 2927) {
-							geometry = projector.project(geometry);
-						}
-
-						if (graphic.setGeometry !== undefined) {
-							graphic.setGeometry(geometry);
-						} else {
-							graphic.geometry = geometry;
-						}
-					} else {
-						throw new Error("Graphic does not have geometry.  ogcSimpleGeometry attribute is incorrect type.");
-					}
-				} else {
-					throw new Error("Graphic has neither geometry nor simpleGeometry attribute.");
-				}
-
-				if (typeof (graphic.isInstanceOf) !== "function" || !graphic.isInstanceOf(esri.Graphic)) {
-					graphic = new esri.Graphic(graphic);
-				}
-			} else {
-				geometry = graphic.geometry;
-				if (geometry.spatialReference.wkid === 2927) {
-					geometry = projector.project(geometry);
-				}
-				if (graphic.setGeometry !== undefined) {
-					graphic.setGeometry(geometry);
-				} else {
-					graphic.geometry = geometry;
-				}
-
-				if (typeof (graphic.isInstanceOf) !== "function" || !graphic.isInstanceOf(esri.Graphic)) {
-					graphic = new esri.Graphic(graphic);
-				}
-			}
-
-			return graphic;
-		},
 		getRoutes: function () {
 			/// <summary>Create projected copies of route polyline graphics and return them in an array</summary>
 			/// <returns type="esri.Graphic[]" />
 			var self = this, output, projector;
 			// routeGeometries = self.routeLayer.graphics.length > 0 ? esri.getGeometries(self.routeLayer.graphics) : [];
 
-			// projector = new Proj4js.EsriProjector(new Proj4js.Proj("GOOGLE"), new Proj4js.Proj("EPSG:2927"));
-			projector = self._projector;
+			projector = new Proj4js.EsriProjector(new Proj4js.Proj("EPSG:3857"), new Proj4js.Proj("EPSG:2927"));
 
 			output = projector.projectGraphics(self.routeLayer.graphics, function (graphic) {
 				var removeRe, name;
@@ -267,7 +266,7 @@
 			layer = self.routeLayer;
 			for (i = 0, l = routes.length; i < l; i += 1) {
 				graphic = routes[i];
-				graphic = self._addGraphicToGeometry(graphic);
+				graphic = addGraphicToGeometry(graphic);
 				layer.add(graphic);
 			}
 			return this;
