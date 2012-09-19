@@ -39,6 +39,10 @@
 		<li>Click additional intersections to generate a route.</li>
 	</ol>
 	<div id="map"></div>
+	<div id="localStorageSection">
+		<button id="saveButton" title="Save route graphics to localStorage.">Save</button>
+		<button id="loadButton" title="Load route graphics from localStorage.">Load</button>
+	</div>
 	<div id="debugSection">
 		<h2>Debug</h2>
 		<p>These buttons will send information to the debug console.</p>
@@ -103,6 +107,40 @@
 					});
 				} else {
 					debugButtons.attr("disabled", true);
+				}
+
+				if (localStorage !== undefined) {
+					// Set up the save button.
+					$("#saveButton").button({
+						icons: {
+							primary: "ui-icon-arrowstop-1-s",
+							
+						}
+					}).click(function(){
+						var routes = $("#map").localRoadsSelector("getRoutes");
+						// Remove the geometry property for each route.
+						for (var i = 0, l = routes.length; i < l; i++) {
+							delete routes[i].geometry;
+							delete routes[i].symbol;
+							delete routes[i].infoTemplate;
+						}
+						localStorage.setItem("routes", JSON.stringify(routes));
+					});
+
+					// Set up the load button.
+					$("#loadButton").button({
+						icons: {
+							primary: "ui-icon-arrowstop-1-n"
+						}
+					}).click(function(){
+						var routes = localStorage.routes;
+						if (routes) {
+							routes = JSON.parse(routes);
+							$("#map").localRoadsSelector("addRoutes", routes);
+						}
+					});
+				} else {
+					$("button", "#localStorageSection").attr("disabled", true);
 				}
 			});
 		} (jQuery));
