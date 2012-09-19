@@ -64,20 +64,20 @@
 		};
 	</script>
 	<script type="text/javascript" src="//serverapi.arcgisonline.com/jsapi/arcgis/?v=3.1compact"></script>
-	<script src="../Scripts/arcGisMap.js" type="text/javascript"></script>
+	<script src="Scripts/arcGisMap.js" type="text/javascript"></script>
 	
-	<script src="scripts/proj4js/proj4js-compressed.js" type="text/javascript"></script>
-	<script src="scripts/proj4js/defs/EPSG2927.js" type="text/javascript"></script>
-	<script src="scripts/proj4js/defs/EPSG3857.js" type="text/javascript"></script>
-	<script src="scripts/clientProjection.js" type="text/javascript"></script>
-	<script src="../Scripts/localRoadsSelector.js" type="text/javascript"></script>
+	<script src="Scripts/proj4js/proj4js-compressed.js" type="text/javascript"></script>
+	<script src="Scripts/proj4js/defs/EPSG2927.js" type="text/javascript"></script>
+	<script src="Scripts/proj4js/defs/EPSG3857.js" type="text/javascript"></script>
+	<script src="Scripts/clientProjection.js" type="text/javascript"></script>
+	<script src="Scripts/localRoadsSelector.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		(function ($) {
 			"use strict";
 			$().ready(function () {
 				var debugButtons = $("#debugSection button");
 				$("#map").localRoadsSelector({
-					reverseGeocodeHandlerUrl: "../ReverseGeocodeIntersection.ashx",
+					reverseGeocodeHandlerUrl: "./ReverseGeocodeIntersection.ashx",
 					routeTaskUrl: "http://tasks.arcgisonline.com/ArcGIS/rest/services/NetworkAnalysis/ESRI_Route_NA/NAServer/Route",
 					layers: [
 						{

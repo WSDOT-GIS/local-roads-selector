@@ -120,7 +120,7 @@
 
 	$.widget("ui.localRoadsSelector", {
 		options: {
-			reverseGeocodeHandlerUrl: "../ReverseGeocodeIntersection.ashx",
+			reverseGeocodeHandlerUrl: "/ReverseGeocodeIntersection.ashx",
 			routeTaskUrl: "http://tasks.arcgisonline.com/ArcGIS/rest/services/NetworkAnalysis/ESRI_Route_NA/NAServer/Route",
 			layers: [
 					{
