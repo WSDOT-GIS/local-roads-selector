@@ -45,7 +45,6 @@
 	</div>
 	<div id="debugSection">
 		<h2>Debug</h2>
-		<p>These buttons will send information to the debug console.</p>
 		<button id="getRoutesButton" title="Sends route graphics to the debug console.">Get Routes</button>
 	</div>
 	
@@ -95,9 +94,11 @@
 				});
 
 				if (console !== undefined && typeof (console.log) === "function") {
-					debugButtons.button();
-
-					$("#getRoutesButton").click(function (evt) {
+					$("#getRoutesButton").button({
+						icons: {
+							primary: "ui-icon-copy"
+						}
+					}).click(function (evt) {
 						var routes = $("#map").localRoadsSelector("getRoutes");
 						if (routes !== null && routes.length > 0) {
 							console.log(routes);

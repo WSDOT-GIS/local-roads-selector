@@ -456,21 +456,33 @@
 
 							// Create "Delete last segment" button.
 							$("<button>").appendTo(".ui-local-roads-selector-controls").attr("title", "Delete the last segment added to the map").button({
-								label: "Delete last segment"
+								label: "Delete last segment",
+								text: false,
+								icons: {
+									primary: "ui-icon-arrowreturnthick-1-w"
+								}
 							}).click(function () {
 								self.deleteLastSegment();
 							});
 
 							// Create "Delete selected" button.
 							$("<button>").appendTo(".ui-local-roads-selector-controls").attr("title", "Delete all selected segments from the map").button({
-								label: "Delete selected"
+								label: "Delete selected",
+								text: false,
+								icons: {
+									primary: "ui-icon-scissors"
+								}
 							}).click(function () {
 								self.removeSelectedRoutes();
 							});
 
 							// Create "Clear" button.
 							$("<button>").appendTo(".ui-local-roads-selector-controls").attr("title", "Clear all segments from the map.").button({
-								label: "Clear"
+								label: "Clear",
+								text: false,
+								icons: {
+									primary: "ui-icon-trash"
+								}
 							}).click(function () {
 								self.clearSegments();
 							});
