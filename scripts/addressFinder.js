@@ -8,7 +8,7 @@
 		$.widget("ui.addressFinder", {
 			options: {
 				geocoder: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Locators/TA_Streets_US_10/GeocodeServer",
-				outputSpatialReference: null
+				outputSpatialReference: 3857
 			},
 			_geocoder: null,
 			_outputSpatialReference: null,
@@ -17,9 +17,22 @@
 				var $this = this, inputBox;
 
 				inputBox = $this.element;
-				if (!/input/.test(inputBox.localName)) {
+
+				inputBox.addClass("ui-address-finder");
+				if (!/input/.test(inputBox[0].localName)) {
 					throw new Error("Element must be 'input'.");
 				}
+
+				// Initialize the options.
+				(function (names) {
+					var name, i, l;
+					for (i = 0, l = names.length; i < l; i += 1) {
+						name = names[i];
+						if ($this.options[name] !== null) {
+							$this._setOption(name, $this.options[name]);
+						}
+					}
+				} (["geocoder", "outputSpatialReference"]));
 
 				return this;
 			},

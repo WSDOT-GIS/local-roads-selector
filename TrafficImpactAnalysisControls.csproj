@@ -53,6 +53,7 @@
   <ItemGroup>
     <None Include="LICENSE" />
     <Content Include="reverseGeocode.html" />
+    <Content Include="scripts\addressFinder.js" />
     <Content Include="scripts\arcGisMap.js" />
     <None Include="README.md" />
     <Content Include="scripts\clientProjection.js" />
