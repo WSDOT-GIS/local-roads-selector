@@ -112,11 +112,13 @@ jQuery
 
 #### deleteLastSegment ####
 Deletes the last route graphic that was added to the map.
+
 ##### Returns #####
 jQuery
 
 #### deleteRoutes ####
 Deletes route graphics from the map.
+
 ##### Parameters #####
 * routes (esri.Graphic[])
 
@@ -125,6 +127,7 @@ jQuery
 
 #### deleteRoute ####
 Deletes a route graphic from the map.
+
 ##### Parameters #####
 * route (esri.Graphic)
 	A route graphic.
