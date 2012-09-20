@@ -108,12 +108,12 @@
 
 		for (i = 0, l = geometries.length; i < l; i += 1) {
 			inGeometry = geometries[i];
-			outGeometry = this.project(geometry);
+			outGeometry = this.project(inGeometry);
 			output.push(outGeometry);
 		}
 
 		return output;
-	}
+	};
 
 	Projector.prototype.projectGraphics = function (graphics, perGraphicFunction) {
 		/// <summary>Projects the geometries in an array of graphics.  Does not modify the original array.</summary>
@@ -145,7 +145,7 @@
 		}
 
 		return output;
-	}
+	};
 
 	Proj4js.EsriProjector = Projector;
-} ());
+}());
