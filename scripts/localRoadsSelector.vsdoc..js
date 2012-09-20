@@ -12,26 +12,6 @@ jQuery.ui.localRoadsSelector = function (options) {
 };
 
 jQuery.ui.localRoadsSelector.prototype = {
-	deleteLastSegment: function () {
-		/// <summary>Deletes the last route graphic that was added to the map.</summary>
-		/// <returns type="jQuery" />
-	},
-	clearSegments: function () {
-		/// <summary>Deletes all graphics from the map.</summary>
-		/// <returns type="jQuery" />
-	},
-	getRoutes: function () {
-		/// <summary>Create projected copies of route polyline graphics and return them in an array</summary>
-		/// <returns type="esri.Graphic[]" />
-	},
-	getGroupedRoutes: function () {
-		/// <summary>Gets the route graphics from the map and groups them by their locationId attribute.  Each unique locationId will have corresponding property in the output object.</summary>
-		/// <returns type="Object" />
-	},
-	getSelectedRoutes: function () {
-		/// <summary>Deletes all of the route graphics that have been selected.  Route graphics can be selected by clicking on them.</summary>
-		/// <returns type="esri.Graphic[]" />
-	},
 	addRoute: function (route) {
 		/// <summary>Adds a route graphic to the route layer utilizing the addRoutes function.</summary>
 		/// <param name="route" type="esri.Graphic">A graphic representing a route.</param>
@@ -40,6 +20,14 @@ jQuery.ui.localRoadsSelector.prototype = {
 	addRoutes: function (routes) {
 		/// <summary>Adds an array of route graphics to the route graphics layer.</summary>
 		/// <param name="routes" type="esri.Graphic[]">An array of route graphics.</param>
+		/// <returns type="jQuery" />
+	},
+	clearSegments: function () {
+		/// <summary>Deletes all graphics from the map.</summary>
+		/// <returns type="jQuery" />
+	},
+	deleteLastSegment: function () {
+		/// <summary>Deletes the last route graphic that was added to the map.</summary>
 		/// <returns type="jQuery" />
 	},
 	deleteRoutes: function (routes) {
@@ -51,6 +39,18 @@ jQuery.ui.localRoadsSelector.prototype = {
 		/// <summary>Deletes a route graphic from the map.</summary>
 		/// <param name="route" type="esri.Graphic">A route graphic.</param>
 		/// <returns type="jQuery" />
+	},
+	getGroupedRoutes: function () {
+		/// <summary>Gets the route graphics from the map and groups them by their locationId attribute.  Each unique locationId will have corresponding property in the output object.</summary>
+		/// <returns type="Object" />
+	},
+	getRoutes: function () {
+		/// <summary>Create projected copies of route polyline graphics and return them in an array</summary>
+		/// <returns type="esri.Graphic[]" />
+	},
+	getSelectedRoutes: function () {
+		/// <summary>Deletes all of the route graphics that have been selected.  Route graphics can be selected by clicking on them.</summary>
+		/// <returns type="esri.Graphic[]" />
 	},
 	removeSelectedRoutes: function () {
 		/// <summary>Removes from the map all routes that are currently selected.</summary>
