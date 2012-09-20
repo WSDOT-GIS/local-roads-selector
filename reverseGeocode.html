@@ -51,8 +51,8 @@
 	<!-- Note the script prerequisites. -->
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js" type="text/javascript"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js" type="text/javascript"></script>
-	<script>
-		// Setup custom dojo package paths.
+	<script type="text/javascript">
+		// Setup custom dojo package paths.  The location properties need to be absolute paths; relative paths will be interpreted relative to the ArcGIS Server API URL.
 		var dojoConfig = {
 			packages: [
 				{
@@ -75,6 +75,7 @@
 /*jslint plusplus: true, white: true, browser: true, devel: true */
 (function ($) {
 	"use strict";
+
 	$().ready(function () {
 		var debugButtons = $("#debugSection button");
 		$("#map").localRoadsSelector({
@@ -101,8 +102,8 @@
 					primary: "ui-icon-copy"
 				}
 			}).click(function () {
-				var routes = $("#map").localRoadsSelector("getRoutes");
-				if (routes !== null && routes.length > 0) {
+				var routes = $("#map").localRoadsSelector("getGroupedRoutes");
+				if (routes !== null) {
 					console.log(routes);
 				} else {
 					console.log("No routes have been defined.");
@@ -117,9 +118,9 @@
 			$("#saveButton").button({
 				icons: {
 					primary: "ui-icon-arrowstop-1-s"
-							
+
 				}
-			}).click(function(){
+			}).click(function () {
 				var routes = $("#map").localRoadsSelector("getRoutes"), i, l;
 				// Remove the geometry property for each route.
 				for (i = 0, l = routes.length; i < l; i++) {
@@ -135,7 +136,7 @@
 				icons: {
 					primary: "ui-icon-arrowstop-1-n"
 				}
-			}).click(function(){
+			}).click(function () {
 				var routes = localStorage.routes;
 				if (routes) {
 					routes = JSON.parse(routes);

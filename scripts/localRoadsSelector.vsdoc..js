@@ -7,7 +7,7 @@ jQuery.ui.localRoadsSelector = function (options) {
 	/// <para>reverseGeocodeHandlerUrl:	The path to the ReverseGeocodeIntersection.ashx file.</para>
 	/// <para>routeTaskUrl:	The URL of the ArcGIS Server route service that will be used to find a line segment between intersections.</para>
 	/// <para>layers:	Defines the layer(s) that will appear in the map.</para>
-	/// <para>resizeWithWindow: Set to true if the map should resize when the window resizes.  Set to false otherwise.
+	/// <para>resizeWithWindow: Set to true if the map should resize when the window resizes.  Set to false otherwise.</para>
 	/// </param>
 };
 
@@ -23,6 +23,10 @@ jQuery.ui.localRoadsSelector.prototype = {
 	getRoutes: function () {
 		/// <summary>Create projected copies of route polyline graphics and return them in an array</summary>
 		/// <returns type="esri.Graphic[]" />
+	},
+	getGroupedRoutes: function () {
+		/// <summary>Gets the route graphics from the map and groups them by their locationId attribute.  Each unique locationId will have corresponding property in the output object.</summary>
+		/// <returns type="Object" />
 	},
 	getSelectedRoutes: function () {
 		/// <summary>Deletes all of the route graphics that have been selected.  Route graphics can be selected by clicking on them.</summary>

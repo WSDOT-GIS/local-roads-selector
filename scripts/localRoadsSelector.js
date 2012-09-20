@@ -12,6 +12,26 @@
 		return new Date().getTime();
 	}
 
+	function groupGraphicsByAttribute(graphics, attribute) {
+		/// <summary>Arranges graphics into groups based on an attribute.</summary>
+		/// <param name="graphics" type="esri.Graphic[]">An array of graphics.  Although this function is designed for use with esri.Graphic objects, any object with an "attributes" object property will actually work.</param>
+		/// <param name="attribute" type="String">The name of the attribute on which the graphics will be grouped.</param>
+		/// <returns type="Object">Returns an object.  Each property of the object will be named after the attribute value.</returns>
+
+		var i, l, graphic, output = {}, attrVal;
+
+		for (i = 0, l = graphics.length; i < l; i++) {
+			graphic = graphics[i];
+			attrVal = String(graphic.attributes[attribute]);
+			if (!output.hasOwnProperty(attrVal)) {
+				output[attrVal] = [];
+			}
+			output[attrVal].push(graphic);
+		}
+
+		return output;
+	}
+
 	function splitRouteName(routeName) {
 		/// <summary>Splits a route name into its four component street names.</summary>
 		/// <returns type="Object">An object with the following properties: main, start, and end.</returns>
@@ -242,6 +262,17 @@
 			});
 
 			return output;
+		},
+		getGroupedRoutes: function () {
+			/// <summary>Gets the route graphics from the map and groups them by their locationId attribute.  Each unique locationId will have corresponding property in the output object.</summary>
+			/// <returns type="Object" />
+			var routes = this.getRoutes();
+			if (routes != null && routes.length > 0) {
+				routes = groupGraphicsByAttribute(routes, "locationId");
+			} else {
+				routes = null;
+			}
+			return routes;
 		},
 		getSelectedRoutes: function () {
 			/// <summary>Deletes all of the route graphics that have been selected.  Route graphics can be selected by clicking on them.</summary>
