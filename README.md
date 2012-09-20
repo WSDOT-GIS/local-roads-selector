@@ -53,10 +53,10 @@ This code is licensed under [The MIT License](http://opensource.org/licenses/MIT
 						type: "esri.layers.ArcGISTiledMapServiceLayer"
 					}
 				],
-				#### intersectionFound ####
+				intersectionFound: function(intersection) {
 					//console.log(intersection.geometry, new ogc.SimpleGeometry(intersection.geometry).toEsriGeometry());
 				},
-				#### routeFound ####
+				routeFound: function(route) {
 					//console.log(route.geometry, new ogc.SimpleGeometry(route.geometry).toEsriGeometry());
 				},
 				resizeWithWindow: false
