@@ -57,7 +57,7 @@
 			packages: [
 				{
 					"name": "ogc",
-					"location": location.pathname.replace(/\/[^/]+$/, "") + "/scripts/ogc"
+					"location": location.pathname.replace(/\/[^\/]+$/, "") + "/scripts/ogc"
 				}
 			]
 		};
@@ -71,80 +71,82 @@
 	<script src="Scripts/clientProjection.js" type="text/javascript"></script>
 	<script src="Scripts/localRoadsSelector.js" type="text/javascript"></script>
 	<script type="text/javascript">
-		(function ($) {
-			"use strict";
-			$().ready(function () {
-				var debugButtons = $("#debugSection button");
-				$("#map").localRoadsSelector({
-					reverseGeocodeHandlerUrl: "./ReverseGeocodeIntersection.ashx",
-					routeTaskUrl: "http://tasks.arcgisonline.com/ArcGIS/rest/services/NetworkAnalysis/ESRI_Route_NA/NAServer/Route",
-					layers: [
-						{
-							url: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/",
-							type: "esri.layers.ArcGISTiledMapServiceLayer"
-						}
-					],
-					intersectionFound: function (event, intersection) {
-						//console.log(intersection.geometry, new ogc.SimpleGeometry(intersection.geometry).toEsriGeometry());
-					},
-					routeFound: function (event, route) {
-						//console.log(route.geometry, new ogc.SimpleGeometry(route.geometry).toEsriGeometry());
-					},
-					resizeWithWindow: false
-				});
-
-				if (console !== undefined && typeof (console.log) === "function") {
-					$("#getRoutesButton").button({
-						icons: {
-							primary: "ui-icon-copy"
-						}
-					}).click(function (evt) {
-						var routes = $("#map").localRoadsSelector("getRoutes");
-						if (routes !== null && routes.length > 0) {
-							console.log(routes);
-						} else {
-							console.log("No routes have been defined.");
-						}
-					});
-				} else {
-					debugButtons.attr("disabled", true);
+/*global jQuery*/
+/*jslint plusplus: true, white: true, browser: true, devel: true */
+(function ($) {
+	"use strict";
+	$().ready(function () {
+		var debugButtons = $("#debugSection button");
+		$("#map").localRoadsSelector({
+			reverseGeocodeHandlerUrl: "./ReverseGeocodeIntersection.ashx",
+			routeTaskUrl: "http://tasks.arcgisonline.com/ArcGIS/rest/services/NetworkAnalysis/ESRI_Route_NA/NAServer/Route",
+			layers: [
+				{
+					url: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/",
+					type: "esri.layers.ArcGISTiledMapServiceLayer"
 				}
+			],
+			////intersectionFound: function (event, intersection) {
+			////	//console.log(intersection.geometry, new ogc.SimpleGeometry(intersection.geometry).toEsriGeometry());
+			////},
+			////routeFound: function (event, route) {
+			////	//console.log(route.geometry, new ogc.SimpleGeometry(route.geometry).toEsriGeometry());
+			////},
+			resizeWithWindow: false
+		});
 
-				if (localStorage !== undefined) {
-					// Set up the save button.
-					$("#saveButton").button({
-						icons: {
-							primary: "ui-icon-arrowstop-1-s",
-							
-						}
-					}).click(function(){
-						var routes = $("#map").localRoadsSelector("getRoutes");
-						// Remove the geometry property for each route.
-						for (var i = 0, l = routes.length; i < l; i++) {
-							delete routes[i].geometry;
-							delete routes[i].symbol;
-							delete routes[i].infoTemplate;
-						}
-						localStorage.setItem("routes", JSON.stringify(routes));
-					});
-
-					// Set up the load button.
-					$("#loadButton").button({
-						icons: {
-							primary: "ui-icon-arrowstop-1-n"
-						}
-					}).click(function(){
-						var routes = localStorage.routes;
-						if (routes) {
-							routes = JSON.parse(routes);
-							$("#map").localRoadsSelector("addRoutes", routes);
-						}
-					});
+		if (console !== undefined && typeof (console.log) === "function") {
+			$("#getRoutesButton").button({
+				icons: {
+					primary: "ui-icon-copy"
+				}
+			}).click(function () {
+				var routes = $("#map").localRoadsSelector("getRoutes");
+				if (routes !== null && routes.length > 0) {
+					console.log(routes);
 				} else {
-					$("button", "#localStorageSection").attr("disabled", true);
+					console.log("No routes have been defined.");
 				}
 			});
-		} (jQuery));
+		} else {
+			debugButtons.attr("disabled", true);
+		}
+
+		if (localStorage !== undefined) {
+			// Set up the save button.
+			$("#saveButton").button({
+				icons: {
+					primary: "ui-icon-arrowstop-1-s"
+							
+				}
+			}).click(function(){
+				var routes = $("#map").localRoadsSelector("getRoutes"), i, l;
+				// Remove the geometry property for each route.
+				for (i = 0, l = routes.length; i < l; i++) {
+					delete routes[i].geometry;
+					delete routes[i].symbol;
+					delete routes[i].infoTemplate;
+				}
+				localStorage.setItem("routes", JSON.stringify(routes));
+			});
+
+			// Set up the load button.
+			$("#loadButton").button({
+				icons: {
+					primary: "ui-icon-arrowstop-1-n"
+				}
+			}).click(function(){
+				var routes = localStorage.routes;
+				if (routes) {
+					routes = JSON.parse(routes);
+					$("#map").localRoadsSelector("addRoutes", routes);
+				}
+			});
+		} else {
+			$("button", "#localStorageSection").attr("disabled", true);
+		}
+	});
+} (jQuery));
 	</script>
 </body>
 </html>
