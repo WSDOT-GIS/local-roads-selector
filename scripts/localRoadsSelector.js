@@ -495,14 +495,26 @@
 
 
 						function setupToolbar() {
-							var mapRoot = $("[id$=root]", self.element);
+							var mapRoot = $("[id$=root]", self.element), toolbar;
+
+
 							// Create toolbar & buttons.
-							$("<div>").addClass("ui-local-roads-selector-controls").css({
-								"text-align": "right"
+							toolbar = $("<div>").addClass("ui-local-roads-selector-controls").css({
+								//"text-align": "right"
+								"position": "absolute",
+								"top": "10px",
+								"right": "10px"
 							}).appendTo(mapRoot);
 
+							// Add the address finder control.
+							$("<input>").attr({
+								type: "search",
+								placeholder: "Enter address or intersection"
+							}).appendTo(toolbar).addressFinder({
+							});
+
 							// Create "Delete last segment" button.
-							$("<button>").appendTo(".ui-local-roads-selector-controls").attr("title", "Delete the last segment added to the map").button({
+							$("<button>").appendTo(toolbar).attr("title", "Delete the last segment added to the map").button({
 								label: "Delete last segment",
 								text: false,
 								icons: {
@@ -513,7 +525,7 @@
 							});
 
 							// Create "Delete selected" button.
-							$("<button>").appendTo(".ui-local-roads-selector-controls").attr("title", "Delete all selected segments from the map").button({
+							$("<button>").appendTo(toolbar).attr("title", "Delete all selected segments from the map").button({
 								label: "Delete selected",
 								text: false,
 								icons: {
@@ -524,7 +536,7 @@
 							});
 
 							// Create "Clear" button.
-							$("<button>").appendTo(".ui-local-roads-selector-controls").attr("title", "Clear all segments from the map.").button({
+							$("<button>").appendTo(toolbar).attr("title", "Clear all segments from the map.").button({
 								label: "Clear",
 								text: false,
 								icons: {

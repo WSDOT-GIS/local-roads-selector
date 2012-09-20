@@ -1,24 +1,83 @@
 ﻿/*globals dojo, esri, jQuery*/
-/*jslint white:true, nomen:true*/
+/*jslint white:true, nomen:true, plusplus:true */
 (function ($) {
 	"use strict";
 	dojo.require("esri.tasks.locator");
 
 	function init() {
+		$.widget("ui.addressCandidateList", {
+			options: {
+				addressCandidates: null
+			},
+			_setOption: function (key, value) {
+				var $this = this, i, l, aCandidate, list = this.element;
+
+				function addressCandidateSelected(event) {
+					/// <summary>Triggers the addressCandidateSelected event.</summary>
+					/// <param name="event" type="Object">Contains property data, which is an addressCandidate property.</param>
+					var addressCandidate = event.data.addressCandidate;
+					$this._trigger("addressCandidateSelected", event, { addressCandidate: addressCandidate });
+				}
+
+				if (key === "addressCandidates") {
+					$this.element.empty();
+					if (value !== null && value !== undefined && value.length > 0) {
+						for (i = 0, l = value.length; i < l; i++) {
+							aCandidate = value[i];
+							$("<li>").appendTo(list).text(aCandidate.address).click({ addressCandidate: aCandidate }, addressCandidateSelected);
+							// TODO: add css class based on score.
+						}
+					}
+				}
+
+				$.Widget.prototype._setOption.apply(this, arguments);
+				return this;
+			},
+			_create: function () {
+				var $this = this;
+
+				if (!/[uo]l/.test($this.element[0].localName)) {
+					throw new Error("Element must be ol or ul.");
+				}
+
+				// Initialize the list if addressCandidates option was provided
+				if ($this.options.addressCandidates !== null && $this.options.addressCandidates.length > 0) {
+					$this._setOption("addressCandidates", $this.options.addressCandidates);
+				}
+
+				return this;
+			},
+			_destroy: function () {
+				$.Widget.prototype.destroy.apply(this, arguments);
+			}
+		});
+
 		$.widget("ui.addressFinder", {
 			options: {
 				geocoder: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Locators/TA_Streets_US_10/GeocodeServer",
-				outputSpatialReference: 3857
+				outputSpatialReference: 3857,
+				searchExtent: null
 			},
 			_geocoder: null,
 			_outputSpatialReference: null,
 			_addressToLocationsDeferred: null,
+			_addressCandidateList: null,
 			_create: function () {
 				var $this = this, inputBox;
 
 				inputBox = $this.element;
 
-				inputBox.addClass("ui-address-finder");
+				// Check that the element is of the correct type: input.
+				inputBox.addClass("ui-address-finder").keyup(function (eventObject) {
+					var address;
+					if (eventObject.keyCode === 13 && $this._geocoder) { // enter key
+						address = this.value;
+						$(this).attr("disabled", true); // Disable the search box.  It will become re-enabled when the geocoder operation completes.
+						$this._geocoder.addressToLocations({
+							"Single Line Input": address
+						});
+					}
+				});
 				if (!/input/.test(inputBox[0].localName)) {
 					throw new Error("Element must be 'input'.");
 				}
@@ -36,8 +95,34 @@
 
 				return this;
 			},
+			_updateAddressCandidateList: function (addressCandidates) {
+				var $this = this;
+				$this.element.attr("disabled", null);
+				if (addressCandidates.length <= 1) {
+					if ($this._addressCandidateList !== null) {
+						$this._addressCandidateList.dialog("close");
+					}
+					if (addressCandidates.length == 1) {
+						// Trigger address selected event.
+						$this._trigger("addressCandidateSelected", null, addressCandidates[0]);
+					}
+				} else if (addressCandidates.length > 1) {
+					// Create address candidate list.
+					if ($this._addressCandidateList === null) {
+						$this._addressCandidateList = $("<ul>").addressCandidateList({
+							addressCandidates: addressCandidates,
+							addressCandidateSelected: function (event) {
+								$this._trigger("addressCandidateSelected", event);
+							}
+						}).dialog(); // TODO: append to a better location.
+					} else {
+						$this._addressCandidateList.addressCandidateList("option", "addressCandidates", addressCandidates).dialog("open");
+					}
+				}
+			},
 			_setOption: function (key, value) {
 				var $this = this;
+
 				if (key === 'outputSpatialReference') {
 					if (typeof (value) === 'number') {
 						$this._outputSpatialReference = new esri.SpatialReference({ wkid: value });
@@ -63,11 +148,11 @@
 					}
 					// Connect new events.
 					this._addressToLocationsDeferred = dojo.connect(this._geocoder, "onAddressToLocationsComplete", $this, function (addressCandidates) {
-						// $this._trigger('addressToLocationsComplete', event, { addressCandidates: addressCandidates });
-
+						$this._updateAddressCandidateList(addressCandidates);
 					});
 				}
 				$.Widget.prototype._setOption.apply(this, arguments);
+				return this;
 			},
 			_destroy: function () {
 				$.Widget.prototype.destroy.apply(this, arguments);
