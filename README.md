@@ -1,4 +1,4 @@
-﻿Local Roads Selector widget
+﻿﻿Local Roads Selector widget
 ===========================
 
 This widget provides a map from which a user can select road segments.  A segment is defined by a main road and two intersecting roads.
@@ -92,6 +92,7 @@ Adds a route graphic to the route layer utilizing the addRoutes function.
 ##### Parameters #####
 * route ([esri.Graphic](http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/graphic.htm))
 	A graphic representing a route.
+
 ##### Returns #####
 [jQuery](http://api.jquery.com/Types/#jQuery)
 
@@ -99,11 +100,13 @@ Adds a route graphic to the route layer utilizing the addRoutes function.
 Adds an array of route graphics to the route graphics layer.
 ##### Parameters #####
 * routes (esri.Graphic[]): An array of route graphics.
+
 ##### Returns #####
 jQuery
 		
 ##### clearSegments #####
 Deletes all graphics from the map.
+
 ##### Returns #####
 jQuery
 
@@ -116,6 +119,7 @@ jQuery
 Deletes route graphics from the map.
 ##### Parameters #####
 * routes (esri.Graphic[])
+
 ##### Returns #####
 jQuery
 
@@ -123,26 +127,31 @@ jQuery
 Deletes a route graphic from the map.
 ##### Parameters #####
 * route (esri.Graphic)
-A route graphic.
+	A route graphic.
+
 ##### Returns #####
 jQuery
 
 #### getGroupedRoutes ####
 Gets the route graphics from the map and groups them by their locationId attribute.  Each unique locationId will have corresponding property in the output object.
+
 ##### Returns #####
 Object
 
 #### getRoutes ####
 Create projected copies of route polyline graphics and return them in an array
+
 ##### Returns #####
 esri.Graphic[]
 
 #### getSelectedRoutes ####
 Deletes all of the route graphics that have been selected.  A user selects route graphics from the map by clicking on them.
+
 ##### Returns #####
 esri.Graphic[]
 
 #### removeSelectedRoutes ####
 Removes from the map all routes that are currently selected.
+
 ##### Returns #####
 jQuery
