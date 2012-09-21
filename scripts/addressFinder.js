@@ -10,7 +10,7 @@
 				addressCandidates: null
 			},
 			_setOption: function (key, value) {
-				var $this = this, i, l, aCandidate, list = this.element;
+				var $this = this, i, l, aCandidate, list = $this._list, score;
 
 				function addressCandidateSelected(event) {
 					/// <summary>Triggers the addressCandidateSelected event.</summary>
@@ -20,12 +20,11 @@
 				}
 
 				if (key === "addressCandidates") {
-					$this.element.empty();
+					list.empty();
 					if (value !== null && value !== undefined && value.length > 0) {
 						for (i = 0, l = value.length; i < l; i++) {
 							aCandidate = value[i];
-							$("<li>").appendTo(list).text(aCandidate.address).click({ addressCandidate: aCandidate }, addressCandidateSelected);
-							// TODO: add css class based on score.
+							$("<li>").appendTo(list).text(aCandidate.address).addClass(["score", Math.round(aCandidate.score)].join("-")).click({ addressCandidate: aCandidate }, addressCandidateSelected);
 						}
 					}
 				}
@@ -33,12 +32,11 @@
 				$.Widget.prototype._setOption.apply(this, arguments);
 				return this;
 			},
+			_list: null,
 			_create: function () {
 				var $this = this;
 
-				if (!/[uo]l/.test($this.element[0].localName)) {
-					throw new Error("Element must be ol or ul.");
-				}
+				$this._list = $("<ul>").appendTo(this.element);
 
 				// Initialize the list if addressCandidates option was provided
 				if ($this.options.addressCandidates !== null && $this.options.addressCandidates.length > 0) {
@@ -102,14 +100,14 @@
 					if ($this._addressCandidateList !== null) {
 						$this._addressCandidateList.dialog("close");
 					}
-					if (addressCandidates.length == 1) {
+					if (addressCandidates.length === 1) {
 						// Trigger address selected event.
 						$this._trigger("addressCandidateSelected", null, addressCandidates[0]);
 					}
 				} else if (addressCandidates.length > 1) {
 					// Create address candidate list.
 					if ($this._addressCandidateList === null) {
-						$this._addressCandidateList = $("<ul>").addressCandidateList({
+						$this._addressCandidateList = $("<div>").addressCandidateList({
 							addressCandidates: addressCandidates,
 							addressCandidateSelected: function (event) {
 								$this._trigger("addressCandidateSelected", event);
