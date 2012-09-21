@@ -4,13 +4,43 @@
 	"use strict";
 	dojo.require("esri.tasks.locator");
 
+	function generateScoreColorCss() {
+		/// <summary>Generates CSS style element that colors address candidate scored elements add adds the element to &lt;head&gt;.</summary>
+		/// <returns type="jQuery">
+		var i, output = $("<style>"), css;
+
+		function generateStyle(min, max, color) {
+			/// <summary>Generates a style for a range of address score classes.</summary>
+			/// <param name="min" type="Number">The minimum value in the address score range.</param>
+			/// <param name="max" type="Number">The maximum value in the address score range.</param>
+			/// <param name="color" type="String">The color description.  E.g. "#00FF00"</param>
+			/// <returns type="String" />
+			var style = [];
+			for (i = min; i <= max; i++) {
+				if (i > min) { style.push(","); }
+				style.push(".score-" + i);
+			}
+			style.push(" { background-color: " + color + "; }");
+			return style.join("");
+		}
+
+		css = [
+			generateStyle(0, 50, "#F00"),
+			generateStyle(51, 84, "#FF0"),
+			generateStyle(85, 100, "#0F0")
+		];
+
+		output.text(css.join(" ")).appendTo("head");
+		return output;
+	}
+
 	function init() {
 		$.widget("ui.addressCandidateList", {
 			options: {
 				addressCandidates: null
 			},
 			_setOption: function (key, value) {
-				var $this = this, i, l, aCandidate, list = $this._list, score;
+				var $this = this, i, l, aCandidate, list = $this._list;
 
 				function addressCandidateSelected(event) {
 					/// <summary>Triggers the addressCandidateSelected event.</summary>
@@ -35,6 +65,8 @@
 			_list: null,
 			_create: function () {
 				var $this = this;
+
+				generateScoreColorCss();
 
 				$this._list = $("<ul>").appendTo(this.element);
 
