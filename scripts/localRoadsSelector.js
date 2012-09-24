@@ -497,7 +497,7 @@
 
 
 						function setupToolbar() {
-							var mapRoot = $("[id$=root]", self.element), toolbar;
+							var mapRoot = $("[id$=root]", self.element), toolbar, basemapGallery, basemapGalleryDialog;
 
 
 							// Create toolbar & buttons.
@@ -555,6 +555,30 @@
 								}
 							}).click(function () {
 								self.clearSegments();
+							});
+
+							// Add basemap gallery button.
+							$("<button>").appendTo(toolbar).attr("title", "Change the basemap").button({
+								label: "Basemap Gallery",
+								text: false,
+								icons: {
+									primary: "ui-icon-image"
+								}
+							}).click(function () {
+								if (!basemapGalleryDialog) {
+									basemapGalleryDialog = $("<div>").dialog({
+										title: "Basemap Gallery"
+									});
+									basemapGallery = new esri.dijit.BasemapGallery({
+										map: map
+									}, basemapGalleryDialog[0]);
+									basemapGallery.startup();
+								} else {
+									basemapGalleryDialog.dialog("open");
+								}
+
+
+
 							});
 						}
 
@@ -642,6 +666,7 @@
 			dojo.require("esri.tasks.route");
 			dojo.require("esri.tasks.geometry");
 			dojo.require("ogc.SimpleGeometry");
+			dojo.require("esri.dijit.BasemapGallery");
 
 			dojo.addOnLoad(function () {
 				init();

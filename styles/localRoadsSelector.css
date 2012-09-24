@@ -1,4 +1,9 @@
-﻿.ui-local-roads-selector-tooltip 
+﻿.esriBasemapGalleryLabelContainer 
+{
+	font-size: 0.7em;
+}
+
+.ui-local-roads-selector-tooltip 
 {
 	border: 1px solid #222222;
 	color: #222222;
