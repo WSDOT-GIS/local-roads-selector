@@ -110,7 +110,7 @@
 				inputBox = $this.element;
 
 				// Check that the element is of the correct type: input.
-				inputBox.addClass("ui-address-finder").keyup(function (eventObject) {
+				inputBox.addClass("ui-address-finder").keypress(function (eventObject) {
 					var address;
 					if (eventObject.keyCode === 13 && $this._geocoder) { // enter key
 						address = this.value;
