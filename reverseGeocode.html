@@ -34,6 +34,7 @@
 		}
 	</style>
 	<!-- This stylesheet (or one from another theme) is required for the jQuery plug-in. -->
+	<link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/dojo/dijit/themes/claro/claro.css">
 	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/themes/base/jquery-ui.css" type="text/css" media="all" />
 </head>
 <body>
@@ -45,7 +46,7 @@
 		<li>Click on an intersection to find the first point of the route.</li>
 		<li>Click additional intersections to generate a route.</li>
 	</ol>
-	<div id="map"></div>
+	<div id="map" class="claro"></div>
 	<div id="localStorageSection">
 		<button id="saveButton" title="Save route graphics to localStorage.">Save</button>
 		<button id="loadButton" title="Load route graphics from localStorage.">Load</button>
@@ -69,7 +70,7 @@
 			]
 		};
 	</script>
-	<script type="text/javascript" src="//serverapi.arcgisonline.com/jsapi/arcgis/?v=3.1compact"></script>
+	<script type="text/javascript" src="//serverapi.arcgisonline.com/jsapi/arcgis/?v=3.1"></script>
 	<script src="Scripts/arcGisMap.js" type="text/javascript"></script>
 	
 	<script src="Scripts/proj4js/proj4js-compressed.js" type="text/javascript"></script>
