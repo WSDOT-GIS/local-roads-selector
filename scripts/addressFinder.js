@@ -40,7 +40,7 @@
 				addressCandidates: null
 			},
 			_setOption: function (key, value) {
-				var $this = this, i, l, aCandidate, list = $this._list;
+				var $this = this, i, l, aCandidate, list = $this._list, onMouseEnter, onMouseLeave;
 
 				function addressCandidateSelected(event) {
 					/// <summary>Triggers the addressCandidateSelected event.</summary>
@@ -49,15 +49,24 @@
 					$this._trigger("addressCandidateSelected", event, { addressCandidate: addressCandidate });
 				}
 
+				onMouseEnter = function (/*event*/) {
+					$(this).addClass("ui-state-hover").removeClass("ui-state-default");
+				};
+
+				onMouseLeave = function (/*event*/) {
+					$(this).removeClass("ui-state-hover").addClass("ui-state-default");
+				};
+
 				if (key === "addressCandidates") {
 					list.empty();
 					if (value !== null && value !== undefined && value.length > 0) {
 						for (i = 0, l = value.length; i < l; i++) {
 							aCandidate = value[i];
 							$("<li>").appendTo(list).text(aCandidate.address).addClass([
+								"ui-state-default",
 								"ui-address-candidate",
 								"ui-address-candidate-score-" + Math.round(aCandidate.score)
-							].join(" ")).click({ addressCandidate: aCandidate }, addressCandidateSelected);
+							].join(" ")).click({ addressCandidate: aCandidate }, addressCandidateSelected).hover(onMouseEnter, onMouseLeave);
 						}
 					}
 				}
@@ -71,7 +80,7 @@
 
 				generateScoreColorCss();
 
-				$this._list = $("<ul>").appendTo(this.element);
+				$this._list = $("<ul>").appendTo(this.element).addClass("ui-address-candidate-list");
 
 				// Initialize the list if addressCandidates option was provided
 				if ($this.options.addressCandidates !== null && $this.options.addressCandidates.length > 0) {
@@ -164,6 +173,11 @@
 					} else if (value.isInstanceOf !== undefined && value.isInstanceOf(esri.SpatialReference)) {
 						$this._outputSpatialReference = value;
 					}
+
+					// Set the spatial reference of the geocoder if it exists.
+					if ($this._geocoder) {
+						$this._geocoder.setOutSpatialReference($this._outputSpatialReference);
+					}
 				}
 				else if (key === 'geocoder') {
 					if (typeof (value) === "string") {
@@ -172,6 +186,11 @@
 						this._geocoder = value;
 					} else {
 						throw new Error("Invalid type assigned to geocoder option.");
+					}
+
+					// If an output spatial reference has been defined, set the geocoder to match.
+					if ($this._outputSpatialReference) {
+						$this._geocoder.setOutputSpatialReference($this._outputSpatialReference);
 					}
 
 					// Disconnect existing events.

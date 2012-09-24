@@ -1,6 +1,6 @@
 ﻿/** Copyright 2012 Washington State Department of Transportation.  Licensed under The MIT License (http://opensource.org/licenses/MIT). **/
 /*global esri, dojo, jQuery, Proj4js, ogc*/
-/*jslint nomen: true, regexp: true, white:true */
+/*jslint nomen: true, regexp: true, white:true, plusplus:true */
 /// <reference path="jsapi_vsdoc_v31.js" />
 /// <reference path="ogc/ogcSimpleGeometry.vsdoc.js" />
 
@@ -267,11 +267,13 @@
 			/// <summary>Gets the route graphics from the map and groups them by their locationId attribute.  Each unique locationId will have corresponding property in the output object.</summary>
 			/// <returns type="Object" />
 			var routes = this.getRoutes();
+			/*jslint eqeq:true*/
 			if (routes != null && routes.length > 0) {
 				routes = groupGraphicsByAttribute(routes, "locationId");
 			} else {
 				routes = null;
 			}
+			/*jslint eqeq:false*/
 			return routes;
 		},
 		getSelectedRoutes: function () {
