@@ -18,7 +18,7 @@
 			var style = [];
 			for (i = min; i <= max; i++) {
 				if (i > min) { style.push(","); }
-				style.push(".score-" + i);
+				style.push(".ui-address-candidate-score-" + i);
 			}
 			style.push(" { background-color: " + color + "; }");
 			return style.join("");
@@ -30,7 +30,7 @@
 			generateStyle(85, 100, "#0F0")
 		];
 
-		output.text(css.join(" ")).appendTo("head");
+		output.text(css.join("\n")).appendTo("head");
 		return output;
 	}
 
@@ -54,7 +54,10 @@
 					if (value !== null && value !== undefined && value.length > 0) {
 						for (i = 0, l = value.length; i < l; i++) {
 							aCandidate = value[i];
-							$("<li>").appendTo(list).text(aCandidate.address).addClass(["score", Math.round(aCandidate.score)].join("-")).click({ addressCandidate: aCandidate }, addressCandidateSelected);
+							$("<li>").appendTo(list).text(aCandidate.address).addClass([
+								"ui-address-candidate",
+								"ui-address-candidate-score-" + Math.round(aCandidate.score)
+							].join(" ")).click({ addressCandidate: aCandidate }, addressCandidateSelected);
 						}
 					}
 				}
@@ -134,7 +137,7 @@
 					}
 					if (addressCandidates.length === 1) {
 						// Trigger address selected event.
-						$this._trigger("addressCandidateSelected", null, addressCandidates[0]);
+						$this._trigger("addressCandidateSelected", null, { addressCandidate: addressCandidates[0] });
 					}
 				} else if (addressCandidates.length > 1) {
 					// Create address candidate list.
@@ -142,9 +145,9 @@
 						$this._addressCandidateList = $("<div>").addressCandidateList({
 							addressCandidates: addressCandidates,
 							addressCandidateSelected: function (event) {
-								$this._trigger("addressCandidateSelected", event);
+								$this._trigger("addressCandidateSelected", event, event.data.addressCandidate);
 							}
-						}).dialog(); // TODO: append to a better location.
+						}).dialog();
 					} else {
 						$this._addressCandidateList.addressCandidateList("option", "addressCandidates", addressCandidates).dialog("open");
 					}

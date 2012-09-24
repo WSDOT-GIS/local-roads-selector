@@ -511,6 +511,9 @@
 								type: "search",
 								placeholder: "Enter address or intersection"
 							}).appendTo(toolbar).addressFinder({
+								addressCandidateSelected: function (event) {
+									console.debug(arguments);
+								}
 							});
 
 							// Create "Delete last segment" button.
