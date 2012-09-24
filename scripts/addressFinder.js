@@ -4,33 +4,46 @@
 	"use strict";
 	dojo.require("esri.tasks.locator");
 
-	function generateScoreColorCss() {
-		/// <summary>Generates CSS style element that colors address candidate scored elements add adds the element to &lt;head&gt;.</summary>
-		/// <returns type="jQuery">
-		var i, output = $("<style>"), css;
+	////function generateScoreColorCss() {
+	////	/// <summary>Generates CSS style element that colors address candidate scored elements add adds the element to &lt;head&gt;.</summary>
+	////	/// <returns type="jQuery">
+	////	var i, output = $("<style>"), css;
 
-		function generateStyle(min, max, color) {
-			/// <summary>Generates a style for a range of address score classes.</summary>
-			/// <param name="min" type="Number">The minimum value in the address score range.</param>
-			/// <param name="max" type="Number">The maximum value in the address score range.</param>
-			/// <param name="color" type="String">The color description.  E.g. "#00FF00"</param>
-			/// <returns type="String" />
-			var style = [];
-			for (i = min; i <= max; i++) {
-				if (i > min) { style.push(","); }
-				style.push(".ui-address-candidate-score-" + i);
-			}
-			style.push(" { background-color: " + color + "; }");
-			return style.join("");
+	////	function generateStyle(min, max, color) {
+	////		/// <summary>Generates a style for a range of address score classes.</summary>
+	////		/// <param name="min" type="Number">The minimum value in the address score range.</param>
+	////		/// <param name="max" type="Number">The maximum value in the address score range.</param>
+	////		/// <param name="color" type="String">The color description.  E.g. "#00FF00"</param>
+	////		/// <returns type="String" />
+	////		var style = [];
+	////		for (i = min; i <= max; i++) {
+	////			if (i > min) { style.push(","); }
+	////			style.push(".ui-address-candidate-score-" + i);
+	////		}
+	////		style.push(" { background-color: " + color + "; }");
+	////		return style.join("");
+	////	}
+
+	////	css = [
+	////		generateStyle(0, 50, "#F00"),
+	////		generateStyle(51, 84, "#FF0"),
+	////		generateStyle(85, 100, "#0F0")
+	////	];
+
+	////	output.text(css.join("\n")).appendTo("head");
+	////	return output;
+	////}
+
+	function getCssClass(score) {
+		var output;
+		if (score > 75) {
+			output = "ui-address-candidate-score-high";
+		} else if (score > 50) {
+			output = "ui-address-candidate-score-med";
+		} else {
+			output = "ui-address-candidate-score-low";
 		}
 
-		css = [
-			generateStyle(0, 50, "#F00"),
-			generateStyle(51, 84, "#FF0"),
-			generateStyle(85, 100, "#0F0")
-		];
-
-		output.text(css.join("\n")).appendTo("head");
 		return output;
 	}
 
@@ -50,11 +63,11 @@
 				}
 
 				onMouseEnter = function (/*event*/) {
-					$(this).addClass("ui-state-hover").removeClass("ui-state-default");
+					$(this).addClass("ui-state-hover");
 				};
 
 				onMouseLeave = function (/*event*/) {
-					$(this).removeClass("ui-state-hover").addClass("ui-state-default");
+					$(this).removeClass("ui-state-hover");
 				};
 
 				if (key === "addressCandidates") {
@@ -63,9 +76,9 @@
 						for (i = 0, l = value.length; i < l; i++) {
 							aCandidate = value[i];
 							$("<li>").appendTo(list).text(aCandidate.address).addClass([
-								"ui-state-default",
 								"ui-address-candidate",
-								"ui-address-candidate-score-" + Math.round(aCandidate.score)
+							// "ui-address-candidate-score-" + Math.round(aCandidate.score)
+								getCssClass(aCandidate.score)
 							].join(" ")).click({ addressCandidate: aCandidate }, addressCandidateSelected).hover(onMouseEnter, onMouseLeave);
 						}
 					}
@@ -78,9 +91,9 @@
 			_create: function () {
 				var $this = this;
 
-				generateScoreColorCss();
+				////generateScoreColorCss();
 
-				$this._list = $("<ul>").appendTo(this.element).addClass("ui-address-candidate-list");
+				$this._list = $("<ul>").appendTo(this.element).addClass("ui-helper-reset ui-address-candidate-list");
 
 				// Initialize the list if addressCandidates option was provided
 				if ($this.options.addressCandidates !== null && $this.options.addressCandidates.length > 0) {
@@ -156,7 +169,9 @@
 							addressCandidateSelected: function (event) {
 								$this._trigger("addressCandidateSelected", event, { addressCandidate: event.data.addressCandidate });
 							}
-						}).dialog();
+						}).dialog({
+							title: "Address Candidates"
+						});
 					} else {
 						$this._addressCandidateList.addressCandidateList("option", "addressCandidates", addressCandidates).dialog("open");
 					}
