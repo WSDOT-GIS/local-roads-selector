@@ -510,14 +510,16 @@
 
 							// Add the address finder control.
 							$("<input>").attr({
-								type: "search",
+								type: "text", // "search",
 								placeholder: "Enter address or intersection"
-							}).appendTo(toolbar).addressFinder({
+							}).addClass("ui-corner-all").appendTo(toolbar).addressFinder({
 								addressCandidateSelected: function (event, data) {
 									var addressCandidate;
 									addressCandidate = data.addressCandidate;
 
 									map.centerAndZoom(addressCandidate.location, 15);
+
+									map.infoWindow.setContent(addressCandidate.address).show(addressCandidate.location);
 								}
 							});
 
