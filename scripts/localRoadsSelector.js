@@ -513,8 +513,11 @@
 								type: "search",
 								placeholder: "Enter address or intersection"
 							}).appendTo(toolbar).addressFinder({
-								addressCandidateSelected: function (event) {
-									console.debug(arguments);
+								addressCandidateSelected: function (event, data) {
+									var addressCandidate;
+									addressCandidate = data.addressCandidate;
+
+									map.centerAndZoom(addressCandidate.location, 15);
 								}
 							});
 

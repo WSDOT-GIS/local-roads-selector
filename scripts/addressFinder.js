@@ -154,7 +154,7 @@
 						$this._addressCandidateList = $("<div>").addressCandidateList({
 							addressCandidates: addressCandidates,
 							addressCandidateSelected: function (event) {
-								$this._trigger("addressCandidateSelected", event, event.data.addressCandidate);
+								$this._trigger("addressCandidateSelected", event, { addressCandidate: event.data.addressCandidate });
 							}
 						}).dialog();
 					} else {
