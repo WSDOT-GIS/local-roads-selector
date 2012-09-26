@@ -52,11 +52,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE" />
+    <Content Include="envelopeSelector.html" />
     <Content Include="reverseGeocode.html" />
     <Content Include="scripts\addressFinder.js" />
     <Content Include="scripts\arcGisMap.js" />
     <None Include="README.md" />
     <Content Include="scripts\clientProjection.js" />
+    <Content Include="scripts\envelopeSelector.js" />
+    <Content Include="scripts\envelopeSelectorTest.js" />
     <Content Include="scripts\graphicInfoTable.js" />
     <Content Include="scripts\jsapi_vsdoc_v31.js" />
     <Content Include="scripts\localRoadsSelector.js" />
