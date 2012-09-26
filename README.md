@@ -13,6 +13,7 @@ This code is licensed under [The MIT License](http://opensource.org/licenses/MIT
 1. Place the following into your page's `<head>`
 ```html
 <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/themes/base/jquery-ui.css" />
+<link rel="stylesheet" href="//serverapi.arcgisonline.com/jsapi/arcgis/3.2/js/esri/css/esri.css" />
 ```
 
 2. Place the following script references into your page.
@@ -30,7 +31,7 @@ This code is licensed under [The MIT License](http://opensource.org/licenses/MIT
 		]
 	};
 </script>
-<script type="text/javascript" src="//serverapi.arcgisonline.com/jsapi/arcgis/?v=3.1compact"></script>
+<script type="text/javascript" src="//serverapi.arcgisonline.com/jsapi/arcgis/?v=3.2compact"></script>
 <script src="../Scripts/arcGisMap.js"></script>
 <script src="scripts/proj4js/proj4js-compressed.js" type="text/javascript"></script>
 <script src="scripts/proj4js/defs/EPSG2927.js" type="text/javascript"></script>
