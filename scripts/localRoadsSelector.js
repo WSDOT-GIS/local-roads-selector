@@ -1,5 +1,5 @@
 ﻿/** Copyright 2012 Washington State Department of Transportation.  Licensed under The MIT License (http://opensource.org/licenses/MIT). **/
-/*global esri, dojo, jQuery, Proj4js, ogc*/
+/*global require, esri, dojo, jQuery, Proj4js, ogc*/
 /*jslint nomen: true, regexp: true, white:true, plusplus:true */
 /// <reference path="jsapi_vsdoc_v31.js" />
 /// <reference path="ogc/ogcSimpleGeometry.vsdoc.js" />
@@ -359,7 +359,7 @@
 			self._tooltip = $("<div>").addClass("ui-local-roads-selector-tooltip").hide().appendTo("body");
 			self._setTooltipStart();
 
-			function init() {
+			require(["esri/symbol", "esri/graphic", "esri/tasks/route", "esri/tasks/geometry", "ogc/SimpleGeometry", "esri/dijit/BasemapGallery"], function () {
 				function handleMapClick(event) {
 					var location, prevGraphic, locationEnd = event.type === "dblclick";
 
@@ -659,17 +659,6 @@
 						setupToolbar();
 					}
 				});
-			}
-
-			dojo.require("esri.symbol");
-			dojo.require("esri.graphic");
-			dojo.require("esri.tasks.route");
-			dojo.require("esri.tasks.geometry");
-			dojo.require("ogc.SimpleGeometry");
-			dojo.require("esri.dijit.BasemapGallery");
-
-			dojo.addOnLoad(function () {
-				init();
 			});
 
 			return this;

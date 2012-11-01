@@ -7,78 +7,78 @@
 (function ($) {
 	"use strict";
 
-	require(["esri/map"], function () {
-
-		$.widget("ui.arcGisMap", {
-			options: {
-				extent: { "xmin": -14402710.641319368, "ymin": 5436246.03029616, "xmax": -12445922.717219383, "ymax": 6479458.5923319645, "spatialReference": { "wkid": 102100} },
-				layers: [
+	$.widget("ui.arcGisMap", {
+		options: {
+			extent: { "xmin": -14402710.641319368, "ymin": 5436246.03029616, "xmax": -12445922.717219383, "ymax": 6479458.5923319645, "spatialReference": { "wkid": 102100} },
+			layers: [
 				{
 					url: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
 					type: "esri.layers.ArcGISTiledMapServiceLayer"
 				}
 			], // layers: An array of objects that defines a "type" of layer, a "url", and (optionally) "options". 
-				logo: true,
-				wrapAround180: false,
-				resizeWithWindow: false
-			},
-			_map: null,
-			getMap: function () {
-				/// <summary>Returns the ArcGIS JavaScript API esri.Map object.</summary>
-				return this._map;
-			},
-			getMapProperty: function (propertyName) {
-				///<summary>Gets a property from the underlying esri.Map object.</summary>
-				return this._map[propertyName];
-			},
-			setMapProperty: function (propertyName, value) {
-				///<summary>Sets the value of a property of the underlying esri.Map object.</summary>
-				this._map[propertyName] = value;
-			},
-			connectMapEvent: function (eventName, handler) {
-				return dojo.connect(this._map, eventName, handler);
-			},
-			callMapFunction: function (functionName) {
-				///<summary>Calls a function of the underlying esri.Map object.</summary>
-				///<param name="functionName">The name of the function.</param>
-				// Convert the arguments into an array.
-				var args, argumentsArray = Array.prototype.slice.call(arguments);
-				// Get the arguments, excluding the function name (the first arg.).
-				args = argumentsArray.slice(1);
-				// Call the specified function, passing in the other arguments.
-				if (this._map) {
-					return this._map[functionName].apply(this._map, args);
-				}
-			},
-			_create: function () {
-				var self = this, resizeTimer;
+			logo: true,
+			wrapAround180: false,
+			resizeWithWindow: false
+		},
+		_map: null,
+		getMap: function () {
+			/// <summary>Returns the ArcGIS JavaScript API esri.Map object.</summary>
+			return this._map;
+		},
+		getMapProperty: function (propertyName) {
+			///<summary>Gets a property from the underlying esri.Map object.</summary>
+			return this._map[propertyName];
+		},
+		setMapProperty: function (propertyName, value) {
+			///<summary>Sets the value of a property of the underlying esri.Map object.</summary>
+			this._map[propertyName] = value;
+		},
+		connectMapEvent: function (eventName, handler) {
+			return dojo.connect(this._map, eventName, handler);
+		},
+		callMapFunction: function (functionName) {
+			///<summary>Calls a function of the underlying esri.Map object.</summary>
+			///<param name="functionName">The name of the function.</param>
+			// Convert the arguments into an array.
+			var args, argumentsArray = Array.prototype.slice.call(arguments);
+			// Get the arguments, excluding the function name (the first arg.).
+			args = argumentsArray.slice(1);
+			// Call the specified function, passing in the other arguments.
+			if (this._map) {
+				return this._map[functionName].apply(this._map, args);
+			}
+		},
+		_create: function () {
+			var self = this, resizeTimer;
 
-				/// <summary>Initializes the creation of the map control.</summary>
-				function getLayerConstructor(layerType) {
-					///<summary>Returns a constructor for a specific type of layer.</summary>
-					if (typeof (layerType) === "string") {
-						if (/(?:esri\.layers\.)?ArcGISTiledMapServiceLayer/i.test(layerType)) {
-							return esri.layers.ArcGISTiledMapServiceLayer;
-						} else if (/(?:esri\.layers\.)?ArcGISDynamicMapServiceLayer/i.test(layerType)) {
-							return esri.layers.ArcGISDynamicMapServiceLayer;
-						} else if (/(?:esri\.layers\.)?ArcGISImageServiceLayer/i.test(layerType)) {
-							return esri.layers.ArcGISImageServiceLayer;
-						} else if (/(?:esri\.layers\.)?FeatureLayer/i.test(layerType)) {
-							return esri.layers.FeatureLayer;
-						} else if (/(?:esri\.layers\.)?KMLLayer/i.test(layerType)) {
-							return esri.layers.KMLLayer;
-						} else {
-							throw new Error("Unsupported layer type.");
-						}
-					} else if (typeof (layerType) === "function") {
-						return layerType;
+			/// <summary>Initializes the creation of the map control.</summary>
+			function getLayerConstructor(layerType) {
+				///<summary>Returns a constructor for a specific type of layer.</summary>
+				if (typeof (layerType) === "string") {
+					if (/(?:esri\.layers\.)?ArcGISTiledMapServiceLayer/i.test(layerType)) {
+						return esri.layers.ArcGISTiledMapServiceLayer;
+					} else if (/(?:esri\.layers\.)?ArcGISDynamicMapServiceLayer/i.test(layerType)) {
+						return esri.layers.ArcGISDynamicMapServiceLayer;
+					} else if (/(?:esri\.layers\.)?ArcGISImageServiceLayer/i.test(layerType)) {
+						return esri.layers.ArcGISImageServiceLayer;
+					} else if (/(?:esri\.layers\.)?FeatureLayer/i.test(layerType)) {
+						return esri.layers.FeatureLayer;
+					} else if (/(?:esri\.layers\.)?KMLLayer/i.test(layerType)) {
+						return esri.layers.KMLLayer;
+					} else {
+						throw new Error("Unsupported layer type.");
 					}
+				} else if (typeof (layerType) === "function") {
+					return layerType;
 				}
+			}
 
-				function createLayer(layerDef) {
-					var constructor = getLayerConstructor(layerDef.type);
-					return constructor(layerDef.url, layerDef.options);
-				}
+			function createLayer(layerDef) {
+				var constructor = getLayerConstructor(layerDef.type);
+				return constructor(layerDef.url, layerDef.options);
+			}
+
+			require(["esri/map"], function () {
 
 				// Set the extent option to an Extent object if it is not already.
 				if (self.options.extent && (!self.options.extent.isInstanceOf || !self.options.extent.isInstanceOf(esri.geometry.Extent))) {
@@ -138,12 +138,12 @@
 				}
 
 				self._map.resize();
+			});
 
-				return self;
-			},
-			_destroy: function () {
-				$.Widget.prototype.destroy.apply(this, arguments);
-			}
-		});
+			return self;
+		},
+		_destroy: function () {
+			$.Widget.prototype.destroy.apply(this, arguments);
+		}
 	});
 } (jQuery));

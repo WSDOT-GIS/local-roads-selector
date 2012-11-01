@@ -5,10 +5,27 @@
 	<link rel="stylesheet" href="//serverapi.arcgisonline.com/jsapi/arcgis/3.2/js/esri/css/esri.css" />
 	<link rel="stylesheet" href="//serverapi.arcgisonline.com/jsapi/arcgis/3.2/js/dojo/dijit/themes/claro/claro.css" />
 	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/themes/base/jquery-ui.css" />
+	<style>
+		#map 
+		{
+		    width: 640px;
+		    height: 480px;
+		}
+		.ui-envelope-selector-toolbar 
+		{
+		    position: absolute;
+		    top: 10px;
+		    right: 10px;
+		    z-index: 30;
+		}
+	</style>
 	<!-- Note the script prerequisites. -->
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js" type="text/javascript"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js" type="text/javascript"></script>
-	<script type="text/javascript" src="//serverapi.arcgisonline.com/jsapi/arcgis/?v=3.2compact"></script></head>
+	<script type="text/javascript" src="//serverapi.arcgisonline.com/jsapi/arcgis/?v=3.2compact"></script>
+	<script src="scripts/arcGisMap.js" type="text/javascript"></script>
+	<script src="scripts/envelopeSelector.js" type="text/javascript"></script>
+</head>
 <body>
 	<div id="map"></div>
 	<script src="scripts/envelopeSelectorTest.js" type="text/javascript"></script>
