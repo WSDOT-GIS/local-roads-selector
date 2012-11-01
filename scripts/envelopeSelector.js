@@ -14,10 +14,21 @@
 		_manualButton: null,
 		// Use the _setOption method to respond to changes to options
 		_map: null,
+		_graphicsLayer: null,
 		setExtent: function (extent) {
-			var $this = this, graphicsLayer = this._map.graphicsLayer;
+			var $this = this;
 
-			graphicsLayer.clear();
+			if (extent) {
+				if ($this._graphicsLayer) {
+					$this._graphicsLayer.clear();
+				} else {
+					$this._graphicsLayer = new esri.layers.GraphicsLayer();
+					$this._graphicsLayer.setRenderer(new esri.renderer.SimpleRenderer(new esri.symbol.SimpleLineSymbol()));
+					$this._map.addLayer($this._graphicsLayer);
+				}
+
+				$this._graphicsLayer.add(new esri.Graphic(extent));
+			}
 
 			return this;
 		},
@@ -34,7 +45,7 @@
 		},
 		_setOption: function (key, value) {
 			if (key === "selectedExtent") {
-				this._drawExtent(value);
+				this.setExtent(value);
 			}
 			// In jQuery UI 1.8, you have to manually invoke the _setOption method from the base widget
 			$.Widget.prototype._setOption.apply(this, arguments);
@@ -42,37 +53,47 @@
 		_create: function () {
 			var $this = this;
 
-			$($this.element).arcGisMap({
-				layers: $this.options.layers,
-				resizeWithWindow: $this.options.resizeWithWindow,
-				mapLoad: function (event, map) {
-					var mapRoot, buttonDiv;
+			require(["esri/toolbars/draw"], function () {
+				$($this.element).arcGisMap({
+					layers: $this.options.layers,
+					resizeWithWindow: $this.options.resizeWithWindow,
+					mapLoad: function (event, map) {
+						var mapRoot, buttonDiv, drawToolbar;
 
-					$this._map = map;
+						$this._map = map;
 
-					// Get the map root div.
-					mapRoot = $(map.root);
+						drawToolbar = new esri.toolbars.Draw(map);
+						dojo.connect(drawToolbar, "onDrawEnd", function (geometry) {
+							drawToolbar.deactivate();
+							$this.setExtent(geometry);
+						});
 
-					buttonDiv = $("<div>").addClass("ui-envelope-selector-toolbar").appendTo(mapRoot);
+						// Get the map root div.
+						mapRoot = $(map.root);
 
-					$this._drawButton = $("<button>").text("Draw Box").attr({
-						type: "button",
-						title: "Draw Box"
-					}).appendTo(buttonDiv).button({
-						icons: {
-							primary: "ui-icon-pencil"
-						}
-					});
+						buttonDiv = $("<div>").addClass("ui-envelope-selector-toolbar").appendTo(mapRoot);
 
-					$this._manualButton = $("<button>").text("Manual").attr({
-						type: "button",
-						title: "Manual entry"
-					}).appendTo(buttonDiv).button({
-						icons: {
-							primary: "ui-icon-calculator"
-						}
-					});
-				}
+						$this._drawButton = $("<button>").text("Draw Box").attr({
+							type: "button",
+							title: "Draw Box"
+						}).appendTo(buttonDiv).button({
+							icons: {
+								primary: "ui-icon-pencil"
+							}
+						}).click(function () {
+							drawToolbar.activate(esri.toolbars.Draw.EXTENT);
+						});
+
+						$this._manualButton = $("<button>").text("Manual").attr({
+							type: "button",
+							title: "Manual entry"
+						}).appendTo(buttonDiv).button({
+							icons: {
+								primary: "ui-icon-calculator"
+							}
+						});
+					}
+				});
 			});
 
 			return this;
