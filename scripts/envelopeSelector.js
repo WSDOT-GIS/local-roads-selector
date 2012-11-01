@@ -50,6 +50,7 @@
 			// In jQuery UI 1.8, you have to manually invoke the _setOption method from the base widget
 			$.Widget.prototype._setOption.apply(this, arguments);
 		},
+		_isDrawing: false,
 		_create: function () {
 			var $this = this;
 
@@ -60,11 +61,31 @@
 					mapLoad: function (event, map) {
 						var mapRoot, buttonDiv, drawToolbar;
 
+						function styleDrawButton() {
+							if (!$this._isDrawing) {
+								$this._drawButton.button({
+									label: "Draw Box",
+									icons: {
+										primary: "ui-icon-pencil"
+									}
+								});
+							} else {
+								$this._drawButton.button({
+									label: "Cancel Drawing",
+									icons: {
+										primary: "ui-icon-close"
+									}
+								});
+							}
+						}
+
 						$this._map = map;
 
 						drawToolbar = new esri.toolbars.Draw(map);
 						dojo.connect(drawToolbar, "onDrawEnd", function (geometry) {
 							drawToolbar.deactivate();
+							$this._isDrawing = false;
+							styleDrawButton();
 							$this.setExtent(geometry);
 						});
 
@@ -81,7 +102,17 @@
 								primary: "ui-icon-pencil"
 							}
 						}).click(function () {
-							drawToolbar.activate(esri.toolbars.Draw.EXTENT);
+							if (!$this._isDrawing) {
+								// Set the widget to draw mode.
+								drawToolbar.activate(esri.toolbars.Draw.EXTENT);
+								$this._isDrawing = true;
+								styleDrawButton();
+							} else {
+								// Cancel the drawing.
+								drawToolbar.deactivate();
+								$this._isDrawing = false;
+								styleDrawButton();
+							}
 						});
 
 						$this._manualButton = $("<button>").text("Manual").attr({
