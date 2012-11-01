@@ -1,5 +1,43 @@
-﻿/// <reference path="arcGisMap.js" />
+﻿/*global jQuery, require, dojo, esri*/
+/*jslint nomen:true*/
+
+/// <reference path="arcGisMap.js" />
 (function ($) {
+	"use strict";
+
+	$.widget("ui.envelopeEntryDialog", $.ui.dialog, {
+		options: {
+			envelope: null,
+			title: "Enter Coordinates"
+		},
+		_xMinBox: null,
+		_yMinBox: null,
+		_xMaxBox: null,
+		_yMaxBox: null,
+		_create: function () {
+			var $this = this;
+
+			$this._xMinBox = $("<input type='number' placeholder='x min'>").appendTo($this.element);
+			$this._yMinBox = $("<input type='number' placeholder='y min'>").appendTo($this.element);
+			$this._xMaxBox = $("<input type='number' placeholder='x max'>").appendTo($this.element);
+			$this._yMaxBox = $("<input type='number' placeholder='y max'>").appendTo($this.element);
+
+
+			this._super(arguments);
+
+			return this;
+		},
+		_setOption: function (key, value) {
+			if (key === "envelope") {
+
+			}
+			this._superApply(arguments);
+		},
+		_destroy: function () {
+			$.Widget.prototype.destroy.apply(this, arguments);
+		}
+	});
+
 	$.widget("ui.envelopeSelector", {
 		options: {
 			layers: [
@@ -10,12 +48,12 @@
 			],
 			resizeWithWindow: true
 		},
+		_manualDialog: null,
 		_drawButton: null,
 		_manualButton: null,
-		// Use the _setOption method to respond to changes to options
 		_map: null,
 		_graphicsLayer: null,
-		setExtent: function (extent) {
+		_setExtent: function (extent) {
 			var $this = this;
 
 			if (extent) {
@@ -32,7 +70,7 @@
 
 			return this;
 		},
-		getExtent: function () {
+		_getExtent: function () {
 			var graphics = this._map.graphicsLayer.graphics, extent, output, graphic;
 			if (graphics.length >= 1) {
 				graphic = graphics[0];
@@ -43,9 +81,10 @@
 
 			return output;
 		},
+		// Use the _setOption method to respond to changes to options
 		_setOption: function (key, value) {
 			if (key === "selectedExtent") {
-				this.setExtent(value);
+				this._setExtent(value);
 			}
 			// In jQuery UI 1.8, you have to manually invoke the _setOption method from the base widget
 			$.Widget.prototype._setOption.apply(this, arguments);
@@ -62,6 +101,7 @@
 						var mapRoot, buttonDiv, drawToolbar;
 
 						function styleDrawButton() {
+							/// <summary>Changes the appearance of the draw button between draw mode and cancel mode.</summary>
 							if (!$this._isDrawing) {
 								$this._drawButton.button({
 									label: "Draw Box",
@@ -86,7 +126,7 @@
 							drawToolbar.deactivate();
 							$this._isDrawing = false;
 							styleDrawButton();
-							$this.setExtent(geometry);
+							$this._setExtent(geometry);
 						});
 
 						// Get the map root div.
@@ -94,6 +134,7 @@
 
 						buttonDiv = $("<div>").addClass("ui-envelope-selector-toolbar").appendTo(mapRoot);
 
+						// Setup the draw button.
 						$this._drawButton = $("<button>").text("Draw Box").attr({
 							type: "button",
 							title: "Draw Box"
@@ -115,12 +156,19 @@
 							}
 						});
 
+						// Setup the manual entry button.
 						$this._manualButton = $("<button>").text("Manual").attr({
 							type: "button",
 							title: "Manual entry"
 						}).appendTo(buttonDiv).button({
 							icons: {
 								primary: "ui-icon-calculator"
+							}
+						}).click(function () {
+							if (!$this._manualDialog) {
+								$this._manualDialog = $("<div>").envelopeEntryDialog();
+							} else {
+								$this._manualDialog.envelopeEntryDialog("open");
 							}
 						});
 					}
