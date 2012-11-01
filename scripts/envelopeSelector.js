@@ -9,14 +9,23 @@
 		options: {
 			envelope: null,
 			title: "Enter Coordinates",
-			buttons: {
-				"OK": function () {
-					$(this).envelopeEntryDialog("close");
+			modal: true,
+			buttons: [
+				{
+					text: "OK",
+					title: "Set envelope to entered coordinates",
+					click: function() {
+						$(this).envelopeEntryDialog("close");
+					}
 				},
-				"Cancel": function () {
-					$(this).envelopeEntryDialog("close");
+				{
+					text: "Cancel",
+					title: "Exit this dialog without setting coordinates",
+					click: function() {
+						$(this).envelopeEntryDialog("close");
+					}
 				}
-			}
+			]
 		},
 		_xMinBox: null,
 		_yMinBox: null,
@@ -24,18 +33,18 @@
 		_yMaxBox: null,
 		_create: function () {
 			var $this = this;
-
+			$("<p>").text("Coordinates are in WA State Plane South (2927)").appendTo($this.element);
 			$("<label>X Min.</label>").appendTo($this.element);
-			$this._xMinBox = $("<input type='number' placeholder='x min'>").appendTo($this.element);
+			$this._xMinBox = $("<input type='text' placeholder='x min'>").appendTo($this.element).spinner();
 			$("<br />").appendTo($this.element);
 			$("<label>Y Min.</label>").appendTo($this.element);
-			$this._yMinBox = $("<input type='number' placeholder='y min'>").appendTo($this.element);
+			$this._yMinBox = $("<input type='text' placeholder='y min'>").appendTo($this.element).spinner();
 			$("<br />").appendTo($this.element);
 			$("<label>X Max.</label>").appendTo($this.element);
-			$this._xMaxBox = $("<input type='number' placeholder='x max'>").appendTo($this.element);
+			$this._xMaxBox = $("<input type='text' placeholder='x max'>").appendTo($this.element).spinner();
 			$("<br />").appendTo($this.element);
 			$("<label>Y Max.</label>").appendTo($this.element);
-			$this._yMaxBox = $("<input type='number' placeholder='y max'>").appendTo($this.element);
+			$this._yMaxBox = $("<input type='text' placeholder='y max'>").appendTo($this.element).spinner();
 
 
 			this._super(arguments);
