@@ -8,7 +8,15 @@
 	$.widget("ui.envelopeEntryDialog", $.ui.dialog, {
 		options: {
 			envelope: null,
-			title: "Enter Coordinates"
+			title: "Enter Coordinates",
+			buttons: {
+				"OK": function () {
+					$(this).envelopeEntryDialog("close");
+				},
+				"Cancel": function () {
+					$(this).envelopeEntryDialog("close");
+				}
+			}
 		},
 		_xMinBox: null,
 		_yMinBox: null,
@@ -17,9 +25,16 @@
 		_create: function () {
 			var $this = this;
 
+			$("<label>X Min.</label>").appendTo($this.element);
 			$this._xMinBox = $("<input type='number' placeholder='x min'>").appendTo($this.element);
+			$("<br />").appendTo($this.element);
+			$("<label>Y Min.</label>").appendTo($this.element);
 			$this._yMinBox = $("<input type='number' placeholder='y min'>").appendTo($this.element);
+			$("<br />").appendTo($this.element);
+			$("<label>X Max.</label>").appendTo($this.element);
 			$this._xMaxBox = $("<input type='number' placeholder='x max'>").appendTo($this.element);
+			$("<br />").appendTo($this.element);
+			$("<label>Y Max.</label>").appendTo($this.element);
 			$this._yMaxBox = $("<input type='number' placeholder='y max'>").appendTo($this.element);
 
 
@@ -163,7 +178,7 @@
 						}).appendTo(buttonDiv).button({
 							icons: {
 								primary: "ui-icon-calculator"
-							}
+							},
 						}).click(function () {
 							if (!$this._manualDialog) {
 								$this._manualDialog = $("<div>").envelopeEntryDialog();
