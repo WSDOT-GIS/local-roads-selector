@@ -66,6 +66,7 @@
     <Content Include="scripts\localRoadsSelector.vsdoc..js" />
     <Content Include="scripts\ogc\ogcSimpleGeometry.vsdoc.js" />
     <Content Include="scripts\ogc\SimpleGeometry.js" />
+    <Content Include="scripts\proj4js\defs\ESRI102100.js" />
     <Content Include="scripts\proj4js\defs\EPSG2927.js" />
     <Content Include="scripts\proj4js\defs\EPSG3857.js" />
     <Content Include="scripts\proj4js\defs\EPSG900913.js" />

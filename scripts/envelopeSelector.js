@@ -1,38 +1,53 @@
-﻿/*global jQuery, require, dojo, esri*/
+﻿/*global jQuery, require, dojo, esri, Proj4js*/
 /*jslint nomen:true*/
 
 /// <reference path="arcGisMap.js" />
+/// <reference path="proj4js/proj4js-combined.js" />
+/// <reference path="proj4js/defs/EPSG2927.js" />
+/// <reference path="proj4js/defs/EPSG3857.js" />
+
 (function ($) {
 	"use strict";
 
+	var projection, mapProjection;
+
+	projection = new Proj4js.Proj("EPSG:2927");
+	mapProjection = new Proj4js.Proj("EPSG:3857");
+
 	$.widget("ui.envelopeEntryDialog", $.ui.dialog, {
 		options: {
-			envelope: null,
+			selectedExtent: null,
+			boundingExtent: null,
 			title: "Enter Coordinates",
 			modal: true,
 			buttons: [
 				{
 					text: "OK",
 					title: "Set envelope to entered coordinates",
-					click: function() {
+					click: function () {
 						$(this).envelopeEntryDialog("close");
 					}
 				},
 				{
 					text: "Cancel",
 					title: "Exit this dialog without setting coordinates",
-					click: function() {
+					click: function () {
 						$(this).envelopeEntryDialog("close");
 					}
 				}
 			]
 		},
+		_projection: null,
+		_mapProjection: null,
 		_xMinBox: null,
 		_yMinBox: null,
 		_xMaxBox: null,
 		_yMaxBox: null,
 		_create: function () {
 			var $this = this;
+
+
+
 			$("<p>").text("Coordinates are in WA State Plane South (2927)").appendTo($this.element);
 			$("<label>X Min.</label>").appendTo($this.element);
 			$this._xMinBox = $("<input type='text' placeholder='x min'>").appendTo($this.element).spinner();
@@ -46,14 +61,20 @@
 			$("<label>Y Max.</label>").appendTo($this.element);
 			$this._yMaxBox = $("<input type='text' placeholder='y max'>").appendTo($this.element).spinner();
 
-
 			this._super(arguments);
 
 			return this;
 		},
 		_setOption: function (key, value) {
-			if (key === "envelope") {
+			var $this = this;
+			if (key === "selectedExtent") {
+			} else if (key === "boundingExtent") {
+				// If no spatial reference is specified, assume 2927.
+				if (!value.spatialReference || value.spatialReference.wkid !== 2927) {
+				}
+				$this._xMinBox.spinner({
 
+				});
 			}
 			this._superApply(arguments);
 		},
@@ -75,19 +96,22 @@
 		_manualDialog: null,
 		_drawButton: null,
 		_manualButton: null,
+		_clearButton: null,
 		_map: null,
 		_graphicsLayer: null,
 		_setExtent: function (extent) {
 			var $this = this;
 
+			// Create the graphics layer if it does not already exist.
+			if ($this._graphicsLayer) {
+				$this._graphicsLayer.clear();
+			} else {
+				$this._graphicsLayer = new esri.layers.GraphicsLayer();
+				$this._graphicsLayer.setRenderer(new esri.renderer.SimpleRenderer(new esri.symbol.SimpleLineSymbol()));
+				$this._map.addLayer($this._graphicsLayer);
+			}
+
 			if (extent) {
-				if ($this._graphicsLayer) {
-					$this._graphicsLayer.clear();
-				} else {
-					$this._graphicsLayer = new esri.layers.GraphicsLayer();
-					$this._graphicsLayer.setRenderer(new esri.renderer.SimpleRenderer(new esri.symbol.SimpleLineSymbol()));
-					$this._map.addLayer($this._graphicsLayer);
-				}
 
 				$this._graphicsLayer.add(new esri.Graphic(extent));
 			}
@@ -163,6 +187,7 @@
 							type: "button",
 							title: "Draw Box"
 						}).appendTo(buttonDiv).button({
+							text: false,
 							icons: {
 								primary: "ui-icon-pencil"
 							}
@@ -185,9 +210,10 @@
 							type: "button",
 							title: "Manual entry"
 						}).appendTo(buttonDiv).button({
+							text: false,
 							icons: {
 								primary: "ui-icon-calculator"
-							},
+							}
 						}).click(function () {
 							if (!$this._manualDialog) {
 								$this._manualDialog = $("<div>").envelopeEntryDialog();
@@ -195,6 +221,17 @@
 								$this._manualDialog.envelopeEntryDialog("open");
 							}
 						});
+
+						$this._clearButton = $("<button type='button'>Clear</button>").appendTo(buttonDiv).button({
+							text: false,
+							icons: {
+								primary: "ui-icon-trash"
+							}
+						}).click(function () {
+							$this._setOption("selectedExtent", null);
+						});
+
+
 					}
 				});
 			});
