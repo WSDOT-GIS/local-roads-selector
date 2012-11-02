@@ -11,9 +11,11 @@
 
 	var projection, mapProjection;
 
+	// Define the projections used by the CIA database and by the map, repsectively.
 	projection = new Proj4js.Proj("EPSG:2927");
 	mapProjection = new Proj4js.Proj("EPSG:3857");
 
+	// Define the manual entry dialog widget.
 	$.widget("ui.envelopeEntryDialog", $.ui.dialog, {
 		options: {
 			selectedExtent: null,
@@ -79,7 +81,8 @@
 			this._superApply(arguments);
 		},
 		_destroy: function () {
-			$.Widget.prototype.destroy.apply(this, arguments);
+			this._super(arguments);
+			//$.Widget.prototype.destroy.apply(this, arguments);
 		}
 	});
 
@@ -102,6 +105,8 @@
 		_setExtent: function (extent) {
 			var $this = this;
 
+			// TODO: Get pre-change extent.  Trigger an extent change event that has previous and current extent arguments.
+
 			// Create the graphics layer if it does not already exist.
 			if ($this._graphicsLayer) {
 				$this._graphicsLayer.clear();
@@ -112,7 +117,7 @@
 			}
 
 			if (extent) {
-
+				// TODO: Detect spatial reference system.  Perform conversion if necessary.
 				$this._graphicsLayer.add(new esri.Graphic(extent));
 			}
 
