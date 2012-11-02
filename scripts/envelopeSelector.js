@@ -5,6 +5,7 @@
 /// <reference path="proj4js/proj4js-combined.js" />
 /// <reference path="proj4js/defs/EPSG2927.js" />
 /// <reference path="proj4js/defs/EPSG3857.js" />
+/// <reference path="clientProjection.js" />
 
 (function ($) {
 	"use strict";
@@ -39,8 +40,6 @@
 				}
 			]
 		},
-		_projection: null,
-		_mapProjection: null,
 		_xMinBox: null,
 		_yMinBox: null,
 		_xMaxBox: null,
@@ -63,7 +62,13 @@
 			$("<label>Y Max.</label>").appendTo($this.element);
 			$this._yMaxBox = $("<input type='text' placeholder='y max'>").appendTo($this.element).spinner();
 
-			this._super(arguments);
+			$this._super(arguments);
+
+			// Add icons to dialog buttons.
+			(function (buttons) {
+				buttons.eq(0).button("option", "icons", { primary: "ui-icon-check" });
+				buttons.eq(1).button("option", "icons", { primary: "ui-icon-close" });
+			} ($(".ui-dialog-buttonset > button", $this.element.parent()).button("option", "text", false)));
 
 			return this;
 		},
@@ -123,7 +128,12 @@
 
 			return this;
 		},
-		_getExtent: function () {
+		_getExtent: function (project) {
+			/// <summary>Gets the currently selected extent from the graphics layer.</summary>
+			/// <param name="project" type="Boolean">
+			/// Set this value to true to project to WA State Plane South (2927).
+			/// Set to false (or a "falsey" value, e.g., null or undefined) to return unprojected (Web Mercator Aux. Sphere, 3857).
+			/// </param>
 			var graphics = this._map.graphicsLayer.graphics, extent, output, graphic;
 			if (graphics.length >= 1) {
 				graphic = graphics[0];
