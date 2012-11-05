@@ -16,6 +16,50 @@
 	projection = new Proj4js.Proj("EPSG:2927");
 	mapProjection = new Proj4js.Proj("EPSG:3857");
 
+	function webMercatorToStatePlaneSouth(geometry) {
+		/// <summary>Projects geometry from web mercator aux. sphere to WA state plane south.</summary>
+		/// <param name="geometry" type="esri.geometry.Geometry">A geometry object.</param>
+		/// <returns type="esri.geometry.Geometry" />
+		var output = null;
+
+		if (!geometry) {
+			output = null;
+		} else if (!geometry.spatialReference) {
+			throw new Error("Cannot project.  Property spatialReference does not exist.");
+		}
+
+		if (geometry.spatialReference.wkid === 2927) {
+			output = geometry;
+		} else if (geometry.spatialReference.wkid === 3857 || geometry.spatialReference.wkid === 102100) {
+			output = Proj4js.projectEsriGeometry(geometry, mapProjection, projection);
+		} else {
+			throw new Error("Unsupported source spatial reference.");
+		}
+
+		return output;
+	}
+
+	function statePlaneSouthToWebMercator(geometry) {
+		/// <summary>Projects geometry from web mercator aux. sphere to WA state plane south.</summary>
+		/// <param name="geometry" type="esri.geometry.Geometry">A geometry object.</param>
+		/// <returns type="esri.geometry.Geometry" />
+		var output;
+
+		if (!geometry) {
+			output = null;
+		} else if (!geometry.spatialReference) {
+			throw new Error("Cannot project.  Property spatialReference does not exist.");
+		} else if (geometry.spatialReference.wkid === 2927) {
+			output = Proj4js.projectEsriGeometry(geometry, projection, mapProjection);
+		} else if (geometry.spatialReference.wkid === 3857 || geometry.spatialReference.wkid === 102100) {
+			output = geometry;
+		} else {
+			throw new Error("Unsupported source spatial reference.");
+		}
+
+		return output;
+	}
+
 	// Define the manual entry dialog widget.
 	$.widget("ui.envelopeEntryDialog", $.ui.dialog, {
 		options: {
@@ -115,6 +159,11 @@
 			$this._xMaxBox = createControlAndLabel("XMax", "X Max.");
 			$this._yMaxBox = createControlAndLabel("YMax", "Y Max.");
 
+			// Sync. the input boxes with the initially specified selected extent.
+			if ($this.options.selectedExtent) {
+				$this._setOption("selectedExtent", $this.options.selectedExtent);
+			}
+
 			$this._super(arguments);
 
 			// Add icons to dialog buttons.
@@ -126,8 +175,28 @@
 			return this;
 		},
 		_setOption: function (key, value) {
-			var $this = this;
+			var $this = this, envelope;
 			if (key === "selectedExtent") {
+				if (value) {
+					// Project if necessary.
+					envelope = webMercatorToStatePlaneSouth(value);
+					$this.options[key] = envelope;
+
+					// Set the text boxes.
+					$this._xMinBox.val(envelope.xmin);
+					$this._yMinBox.val(envelope.ymin);
+					$this._xMaxBox.val(envelope.xmax);
+					$this._yMaxBox.val(envelope.ymax);
+				} else {
+					// Nullify the boxes.
+					$this.options[key] = null;
+					$this._xMinBox.val("");
+					$this._yMinBox.val("");
+					$this._xMaxBox.val("");
+					$this._yMaxBox.val("");
+				}
+
+
 				$this._trigger("extentSelect", null, {
 					envelope: value
 				});
@@ -153,6 +222,7 @@
 						type: "esri.layers.ArcGISTiledMapServiceLayer"
 					}
 			],
+			selectedExtent: null,
 			resizeWithWindow: true
 		},
 		_manualDialog: null,
@@ -162,9 +232,7 @@
 		_map: null,
 		_graphicsLayer: null,
 		_setExtent: function (extent) {
-			var $this = this;
-
-			// TODO: Get pre-change extent.  Trigger an extent change event that has previous and current extent arguments.
+			var $this = this, mapExtent, spsExtent;
 
 			// Create the graphics layer if it does not already exist.
 			if ($this._graphicsLayer) {
@@ -176,29 +244,22 @@
 			}
 
 			if (extent) {
-				// TODO: Detect spatial reference system.  Perform conversion if necessary.
-				$this._graphicsLayer.add(new esri.Graphic(extent));
+				mapExtent = statePlaneSouthToWebMercator(extent);
+				spsExtent = webMercatorToStatePlaneSouth(extent);
+
+				$this._graphicsLayer.add(new esri.Graphic(mapExtent));
+				$this.options.selectedExtent = spsExtent;
+			} else {
+				$this.options.selectedExtent = null;
 			}
+
+			// Trigger event.
+			$this._trigger("extentSelect", null, {
+				mapExtent: mapExtent || null,
+				spsExtent: spsExtent || null
+			});
 
 			return this;
-		},
-		_getExtent: function (project) {
-			/// <summary>Gets the currently selected extent from the graphics layer.</summary>
-			/// <param name="project" type="Boolean">
-			/// Set this value to true to project to WA State Plane South (2927).
-			/// Set to false (or a "falsey" value, e.g., null or undefined) to return unprojected (Web Mercator Aux. Sphere, 3857).
-			/// </param>
-			var graphics = this._map.graphicsLayer.graphics, extent, output, graphic;
-			if (graphics.length >= 1) {
-				graphic = graphics[0];
-				extent = graphic.geometry;
-
-			} else {
-				output = null;
-			}
-			// TODO perform projection if necessary.
-
-			return output;
 		},
 		// Use the _setOption method to respond to changes to options
 		_setOption: function (key, value) {
@@ -210,13 +271,14 @@
 		},
 		_isDrawing: false,
 		_create: function () {
+			/// <summary>Creates the envelopeSelector widget.</summary>
 			var $this = this;
 
 			require(["esri/toolbars/draw"], function () {
 				$($this.element).arcGisMap({
 					layers: $this.options.layers,
 					resizeWithWindow: $this.options.resizeWithWindow,
-					mapLoad: function (event, map) {
+					mapLoad: function (event, map) { // Although JSLint will complain, the "event" parameter is necessary for method signature.
 						var mapRoot, buttonDiv, drawToolbar;
 
 						function styleDrawButton() {
@@ -287,9 +349,11 @@
 							}
 						}).click(function () {
 							if (!$this._manualDialog) {
-								$this._manualDialog = $("<div>").envelopeEntryDialog();
+								$this._manualDialog = $("<div>").envelopeEntryDialog({
+									selectedExtent: $this.options.selectedExtent
+								});
 							} else {
-								$this._manualDialog.envelopeEntryDialog("open");
+								$this._manualDialog.envelopeEntryDialog("option", "selectedExtent", $this.options.selectedExtent).envelopeEntryDialog("open");
 							}
 						});
 
@@ -299,7 +363,7 @@
 								primary: "ui-icon-trash"
 							}
 						}).click(function () {
-							$this._setOption("selectedExtent", null);
+							$this._setExtent(null);
 						});
 
 
