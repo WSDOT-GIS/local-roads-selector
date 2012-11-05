@@ -37,6 +37,30 @@
 		return output;
 	}
 
+	function projectEnvelope(envelope, sourcePrj, destPrj) {
+		var output, min, max;
+		if (envelope.xmin !== undefined && envelope.ymin !== undefined && envelope.xmax !== undefined && envelope.ymax !== undefined) {
+			// Create min and max points.
+			min = { x: envelope.xmin, y: envelope.ymin };
+			max = { x: envelope.xmax, y: envelope.ymax };
+
+			// Project the min and max points.
+			min = Proj4js.transform(sourcePrj, destPrj, min);
+			max = Proj4js.transform(sourcePrj, destPrj, max);
+
+			output = {
+				xmin: min.x,
+				ymin: min.y,
+				xmax: max.x,
+				ymax: max.y
+			};
+		} else {
+			throw new Error("Invalid envelope object.");
+		}
+
+		return output;
+	}
+
 	function projectEsriGeometry(geometry, sourcePrj, destPrj) {
 		/// <summary>Projects an esri.Geometry from one projection to another using Proj4js.</summary>
 		/// <param name="geometry" type="esri.Geometry|object">An esri.Geometry object (or a JSON object that can be passed to a geometry constructor).</param>
@@ -53,6 +77,8 @@
 
 		if (geometry.x !== undefined && geometry.y !== undefined) {
 			output = Proj4js.transform(sourcePrj, destPrj, { x: geometry.x, y: geometry.y });
+		} else if (geometry.xmin !== undefined && geometry.ymin !== undefined && geometry.xmax !== undefined && geometry.ymax !== undefined) {
+			output = projectEnvelope(geometry, sourcePrj, destPrj);
 		} else if (geometry instanceof Array && geometry.length >= 2) {
 			output = projectNumberPair(geometry, sourcePrj, destPrj);
 		} else if (geometry.points !== undefined) { // multipoint
@@ -148,4 +174,4 @@
 	};
 
 	Proj4js.EsriProjector = Projector;
-}());
+} ());
