@@ -20,22 +20,52 @@
 	$.widget("ui.envelopeEntryDialog", $.ui.dialog, {
 		options: {
 			selectedExtent: null,
-			boundingExtent: null,
 			title: "Enter Coordinates",
 			modal: true,
 			buttons: [
 				{
 					text: "OK",
 					title: "Set envelope to entered coordinates",
-					click: function () {
-						$(this).envelopeEntryDialog("close");
+					click: function (/*event*/) {
+						var $this, xmin, ymin, xmax, ymax, envelope;
+
+						function getNumberOrNull(value) {
+							var output;
+							output = value ? Number(value) : null;
+							return output;
+						}
+
+						$this = $(this).data("envelopeEntryDialog");
+						xmin = getNumberOrNull($this._xMinBox.val());
+						ymin = getNumberOrNull($this._yMinBox.val());
+						xmax = getNumberOrNull($this._xMaxBox.val());
+						ymax = getNumberOrNull($this._yMaxBox.val());
+
+						// Create the envelope object.  Set to null if the values are not specified.
+						envelope = xmin === null || ymin === null || xmax === null || ymax === null ? null : {
+							xmin: xmin,
+							ymin: ymin,
+							xmax: xmax,
+							ymax: ymax,
+							spatialReference: {
+								wkid: 2927
+							}
+						};
+
+						if (envelope) {
+							$this.option("selectedExtent", envelope);
+						}
+
+						// $this.close();
+						$this._form.submit();
 					}
 				},
 				{
 					text: "Cancel",
 					title: "Exit this dialog without setting coordinates",
 					click: function () {
-						$(this).envelopeEntryDialog("close");
+						var $this = $(this).data("envelopeEntryDialog");
+						$this.close();
 					}
 				}
 			]
@@ -44,23 +74,46 @@
 		_yMinBox: null,
 		_xMaxBox: null,
 		_yMaxBox: null,
+		_form: null,
 		_create: function () {
-			var $this = this;
+			var $this = this, thisId;
+			// Setup an id to use as a base for child control ids.
+			thisId = this.id || "envelopeSelector" + new Date().getTime();
+
+			function createControlAndLabel(idSuffix, label, name, placeholder) {
+				/// <summary>Creates a number input control and associated label.</summary>
+				/// <param name="idSuffix" type="String">A suffix that will be used to create the input box's ID.</param>
+				/// <param name="label" type="String">The text of the label.</param>
+				/// <param name="placeholder" type="String">The text of the input box's placeholder attribute.  If omitted, the label parameter will be used.</param>
+				/// <returns type="jQuery">The created input box.</returns>
+				var div, id;
+				id = thisId + idSuffix;
+				div = $("<div>").appendTo($this._form);
+				$("<label>").text(label).attr("for", id).appendTo(div);
+				return $("<input>").attr({
+					type: "number",
+					name: name || idSuffix,
+					required: true,
+					placeholder: placeholder || label,
+					id: id
+				}).appendTo(div);
+			}
+
+			$this._form = $("<form>").attr({
+				action: "#",
+				method: "GET"
+			}).appendTo($this.element).submit(function () {
+				$this.close();
+				return false;
+			});
 
 
+			$("<p>").text("Coordinates are in WA State Plane South (2927)").appendTo($this._form);
 
-			$("<p>").text("Coordinates are in WA State Plane South (2927)").appendTo($this.element);
-			$("<label>X Min.</label>").appendTo($this.element);
-			$this._xMinBox = $("<input type='text' placeholder='x min'>").appendTo($this.element).spinner();
-			$("<br />").appendTo($this.element);
-			$("<label>Y Min.</label>").appendTo($this.element);
-			$this._yMinBox = $("<input type='text' placeholder='y min'>").appendTo($this.element).spinner();
-			$("<br />").appendTo($this.element);
-			$("<label>X Max.</label>").appendTo($this.element);
-			$this._xMaxBox = $("<input type='text' placeholder='x max'>").appendTo($this.element).spinner();
-			$("<br />").appendTo($this.element);
-			$("<label>Y Max.</label>").appendTo($this.element);
-			$this._yMaxBox = $("<input type='text' placeholder='y max'>").appendTo($this.element).spinner();
+			$this._xMinBox = createControlAndLabel("XMin", "X Min.");
+			$this._yMinBox = createControlAndLabel("YMin", "Y Min.");
+			$this._xMaxBox = createControlAndLabel("XMax", "X Max.");
+			$this._yMaxBox = createControlAndLabel("YMax", "Y Max.");
 
 			$this._super(arguments);
 
@@ -75,17 +128,18 @@
 		_setOption: function (key, value) {
 			var $this = this;
 			if (key === "selectedExtent") {
-			} else if (key === "boundingExtent") {
-				// If no spatial reference is specified, assume 2927.
-				if (!value.spatialReference || value.spatialReference.wkid !== 2927) {
-				}
-				$this._xMinBox.spinner({
-
+				$this._trigger("extentSelect", null, {
+					envelope: value
 				});
 			}
 			this._superApply(arguments);
 		},
 		_destroy: function () {
+			// remove elements that were added by this widget.
+			this._form.remove();
+			if (this._manualDialog) {
+				this._manualDialog.remove();
+			}
 			this._super(arguments);
 			//$.Widget.prototype.destroy.apply(this, arguments);
 		}
@@ -138,9 +192,11 @@
 			if (graphics.length >= 1) {
 				graphic = graphics[0];
 				extent = graphic.geometry;
+
 			} else {
 				output = null;
 			}
+			// TODO perform projection if necessary.
 
 			return output;
 		},
@@ -149,8 +205,8 @@
 			if (key === "selectedExtent") {
 				this._setExtent(value);
 			}
-			// In jQuery UI 1.8, you have to manually invoke the _setOption method from the base widget
-			$.Widget.prototype._setOption.apply(this, arguments);
+
+			this._superApply(arguments);
 		},
 		_isDrawing: false,
 		_create: function () {
