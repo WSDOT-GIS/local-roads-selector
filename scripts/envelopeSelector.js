@@ -352,7 +352,11 @@
 						}).click(function () {
 							if (!$this._manualDialog) {
 								$this._manualDialog = $("<div>").envelopeEntryDialog({
-									selectedExtent: $this.options.selectedExtent
+									selectedExtent: $this.options.selectedExtent,
+									// Connect the dialog's extentSelect event.
+									extentSelect: function (event, data) {
+										$this.option("selectedExtent", data.envelope);
+									}
 								});
 							} else {
 								$this._manualDialog.envelopeEntryDialog("option", "selectedExtent", $this.options.selectedExtent).envelopeEntryDialog("open");
