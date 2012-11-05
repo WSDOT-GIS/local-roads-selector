@@ -73,6 +73,7 @@
     <Content Include="scripts\proj4js\defs\GOOGLE.js" />
     <Content Include="scripts\proj4js\proj4js-combined.js" />
     <Content Include="scripts\proj4js\proj4js-compressed.js" />
+    <Content Include="styles\envelopeSelector.css" />
     <Content Include="styles\localRoadsSelector.css" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">

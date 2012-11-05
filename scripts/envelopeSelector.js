@@ -124,6 +124,8 @@
 			// Setup an id to use as a base for child control ids.
 			thisId = this.id || "envelopeSelector" + new Date().getTime();
 
+			$this.element.addClass("ui-envelope-entry-dialog");
+
 			function createControlAndLabel(idSuffix, label, name, placeholder) {
 				/// <summary>Creates a number input control and associated label.</summary>
 				/// <param name="idSuffix" type="String">A suffix that will be used to create the input box's ID.</param>
