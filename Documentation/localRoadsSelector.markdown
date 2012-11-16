@@ -94,13 +94,13 @@ Create projected copies of route polyline graphics and return them in an array
 esri.Graphic[]
 
 #### getSelectedRoutes ####
-Deletes all of the route graphics that have been selected.  A user selects route graphics from the map by clicking on them.
+Returns all of the route graphics that have been selected.  A user selects route graphics from the map by clicking on them.
 
 ##### Returns #####
 esri.Graphic[]
 
 #### removeSelectedRoutes ####
-Removes from the map all routes that are currently selected.
+Deletes all of the route graphics that have been selected.  A user selects route graphics from the map by clicking on them.
 
 ##### Returns #####
 jQuery
