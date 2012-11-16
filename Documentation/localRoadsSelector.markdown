@@ -10,7 +10,7 @@ This code is licensed under [The MIT License](http://opensource.org/licenses/MIT
 * [Proj4js](https://github.com/bewest/proj4js): This is used to perform client side map projections.
 
 ### Setup ###
-The file `localRoadsSelector.html` demonstrates how to use this widget.
+The file [localRoadsSelector.html](../localRoadsSelector.html) demonstrates how to use this widget.
 
 ### Options ###
 
