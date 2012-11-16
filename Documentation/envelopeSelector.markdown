@@ -65,7 +65,7 @@ $("#map").envelopeSelector({
 });
 ```
 
-* The spatial reference of `mapExtent` is actually the same as whatever the map is using.  This is normally [Web Mercator Auxiliary Sphere (EPSG:3857)], but it is possible to set it to a different one.
+\* The spatial reference of `mapExtent` is actually the same as whatever the map is using.  This is normally [Web Mercator Auxiliary Sphere (EPSG:3857)], but it is possible to set it to a different one.
 
 [esri.geometry.Extent]:(http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/extent.htm)
 [Washington State Plane South (EPSG:2927)]:(http://spatialreference.org/ref/epsg/2927/)
