@@ -10,7 +10,7 @@ This code is licensed under [The MIT License](http://opensource.org/licenses/MIT
 * [Proj4js](https://github.com/bewest/proj4js): This is used to perform client side map projections.
 
 ## Setup ##
-See `envelopeSelector.html`.
+See [envelopeSelector.html](../envelopeSelector.html).
 
 ## Options ##
 
@@ -56,7 +56,7 @@ var extent = $("#map").envelopeSelector("option", "selectedExtent");
 ### `extentSelect` ###
 This event is triggered when the `selectedExtent` option is changed either by the user through the UI or through the `option` function.
 The data object returned from this event has two parameters: `mapExtent` and `spsExtent`.  Each of these is an [esri.geometry.Extent] object representing the selected extent in a different coordinate system.
-The spatial reference of `mapExtent` is [Web Mercator Auxiliary Sphere (EPSG:3857)]* and `spsExtent` is [Washington State Plane South (EPSG:2927)]
+The spatial reference of `mapExtent` is *Web Mercator Auxiliary Sphere (EPSG:3857)* and `spsExtent` is *Washington State Plane South (EPSG:2927)*.
 ```javascript
 $("#map").envelopeSelector({
 	extentSelect: function(event, data) {
@@ -67,8 +67,6 @@ $("#map").envelopeSelector({
 });
 ```
 
-\* The spatial reference of `mapExtent` is actually the same as whatever the map is using.  This is normally [Web Mercator Auxiliary Sphere (EPSG:3857)], but it is possible to set it to a different one.
+\* The spatial reference of `mapExtent` is actually the same as whatever the map is using.  This is normally EPSG:3857, but it is possible to set it to a different one.
 
 [esri.geometry.Extent]:(http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/extent.htm)
-[Washington State Plane South (EPSG:2927)]:(http://spatialreference.org/ref/epsg/2927/)
-[Web Mercator Auxiliary Sphere (EPSG:3857)]:(http://spatialreference.org/ref/sr-org/7483/)
