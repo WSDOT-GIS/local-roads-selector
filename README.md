@@ -10,4 +10,4 @@ This code is licensed under [The MIT License](http://opensource.org/licenses/MIT
 ## Acknowledgements ##
 * [Proj4js](https://github.com/bewest/proj4js): This is used to perform client side map projections.
 
-[Documentation]:./tree/master/Documentation
+[Documentation]:tree/master/Documentation
