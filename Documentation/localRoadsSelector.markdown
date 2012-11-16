@@ -45,28 +45,28 @@ Adds a route graphic to the route layer utilizing the addRoutes function.
 #### addRoutes ####
 Adds an array of route graphics to the route graphics layer.
 ##### Parameters #####
-* routes (esri.Graphic[]): An array of route graphics.
+* routes ([esri.Graphic]\[\]): An array of route graphics.
 
 ##### Returns #####
-jQuery
+[jQuery]
 		
 ##### clearSegments #####
 Deletes all graphics from the map.
 
 ##### Returns #####
-jQuery
+[jQuery]
 
 #### deleteLastSegment ####
 Deletes the last route graphic that was added to the map.
 
 ##### Returns #####
-jQuery
+[jQuery]
 
 #### deleteRoutes ####
 Deletes route graphics from the map.
 
 ##### Parameters #####
-* routes (esri.Graphic[])
+* routes ([esri.Graphic]\[\])
 
 ##### Returns #####
 jQuery
@@ -75,7 +75,7 @@ jQuery
 Deletes a route graphic from the map.
 
 ##### Parameters #####
-* route (esri.Graphic)
+* route ([esri.Graphic])
 	A route graphic.
 
 ##### Returns #####
@@ -91,19 +91,19 @@ Object
 Create projected copies of route polyline graphics and return them in an array
 
 ##### Returns #####
-esri.Graphic[]
+[esri.Graphic]\[\]
 
 #### getSelectedRoutes ####
 Returns all of the route graphics that have been selected.  A user selects route graphics from the map by clicking on them.
 
 ##### Returns #####
-esri.Graphic[]
+[esri.Graphic]\[\]
 
 #### removeSelectedRoutes ####
 Deletes all of the route graphics that have been selected.  A user selects route graphics from the map by clicking on them.
 
 ##### Returns #####
-jQuery
+[jQuery]
 
 [The MIT License]:http://opensource.org/licenses/MIT
 [Proj4js]:https://github.com/bewest/proj4js
