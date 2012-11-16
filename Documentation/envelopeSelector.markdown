@@ -60,7 +60,9 @@ The spatial reference of `mapExtent` is [Web Mercator Auxiliary Sphere (EPSG:385
 ```javascript
 $("#map").envelopeSelector({
 	extentSelect: function(event, data) {
-		
+		// Do something with the extents...
+		console.log(JSON.stringify(data.mapExtent));
+		console.log(JSON.stringify(data.spsExtent));
 	}
 });
 ```
