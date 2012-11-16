@@ -137,16 +137,17 @@
 				div = $("<div>").appendTo($this._form);
 				$("<label>").text(label).attr("for", id).appendTo(div);
 				return $("<input>").attr({
-					type: "number",
+					type: "text", //"number",
 					name: name || idSuffix,
-					required: true,
+					// required: true,
 					placeholder: placeholder || label,
 					id: id
-				}).appendTo(div);
+				}).addClass("number required").appendTo(div);
 			}
 
 			$this._form = $("<form>").attr({
 				action: "#",
+				id: thisId + "form",
 				method: "GET"
 			}).appendTo($this.element).submit(function () {
 				$this.close();
@@ -173,6 +174,12 @@
 				buttons.eq(0).button("option", "icons", { primary: "ui-icon-check" });
 				buttons.eq(1).button("option", "icons", { primary: "ui-icon-close" });
 			} ($(".ui-dialog-buttonset > button", $this.element.parent()).button("option", "text", false)));
+
+			$this._form.validate({
+				submitHandler: function (/*form*/) {
+					$this.close();
+				}
+			});
 
 			return this;
 		},
@@ -255,6 +262,8 @@
 				$this.options.selectedExtent = null;
 			}
 
+			$this._graphicsLayer.refresh();
+
 			// Trigger event.
 			$this._trigger("extentSelect", null, {
 				mapExtent: mapExtent || null,
@@ -275,6 +284,8 @@
 		_create: function () {
 			/// <summary>Creates the envelopeSelector widget.</summary>
 			var $this = this;
+
+
 
 			require(["esri/toolbars/draw"], function () {
 				$($this.element).arcGisMap({
@@ -303,6 +314,11 @@
 						}
 
 						$this._map = map;
+
+						// If the selectedExtent option was specified in the constructor, ensure the box is added to the map.
+						if ($this.options.selectedExtent) {
+							$this._setExtent($this.options.selectedExtent);
+						}
 
 						drawToolbar = new esri.toolbars.Draw(map);
 						dojo.connect(drawToolbar, "onDrawEnd", function (geometry) {
@@ -354,7 +370,7 @@
 								$this._manualDialog = $("<div>").envelopeEntryDialog({
 									selectedExtent: $this.options.selectedExtent,
 									// Connect the dialog's extentSelect event.
-									extentSelect: function (event, data) {
+									extentSelect: function (event, data) { // Although JSLint will complain, the "event" parameter is necessary for method signature.
 										$this.option("selectedExtent", data.envelope);
 									}
 								});

@@ -51,6 +51,8 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Documentation\envelopeSelector.markdown" />
+    <None Include="Documentation\localRoadsSelector.markdown" />
     <None Include="LICENSE" />
     <Content Include="envelopeSelector.html" />
     <Content Include="reverseGeocode.html" />
