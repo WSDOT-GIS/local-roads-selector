@@ -4,24 +4,24 @@
 This widget provides a map from which a user can select road segments.  A segment is defined by a main road and two intersecting roads.
 
 ## License ##
-This code is licensed under [The MIT License](http://opensource.org/licenses/MIT).  See the `LICENSE` file for details.
+This code is licensed under [The MIT License].  See the `LICENSE` file for details.
 
 ## Acknowledgements ##
-* [Proj4js](https://github.com/bewest/proj4js): This is used to perform client side map projections.
+* [Proj4js]: This is used to perform client side map projections.
 
 ### Setup ###
-The file [localRoadsSelector.html](../localRoadsSelector.html) demonstrates how to use this widget.
+The file [localRoadsSelector.html] demonstrates how to use this widget.
 
 ### Options ###
 
 #### *reverseGeocodeHandlerUrl* ###
-Since the [ArcGIS REST API](http://resources.arcgis.com/en/help/rest/apiref/) does not currently support reverse geocoding to an intersection, a special handler must be used that calls the [ArcGIS SOAP API](http://resources.arcgis.com/en/help/soap/10.1/)'s [reverse geocode](http://resources.arcgis.com/en/help/soap/10.1/#/ReverseGeocode/01vp000000n6000000/) endpoint and converts its results from XML to JSON.  The `ReverseGeocodeIntersection.ashx` handler provides this ability.
+Since the [ArcGIS REST API] does not currently support reverse geocoding to an intersection, a special handler must be used that calls the [ArcGIS SOAP API](http://resources.arcgis.com/en/help/soap/10.1/)'s [reverse geocode](http://resources.arcgis.com/en/help/soap/10.1/#/ReverseGeocode/01vp000000n6000000/) endpoint and converts its results from XML to JSON.  The `ReverseGeocodeIntersection.ashx` handler provides this ability.
 
 #### *routeTaskUrl* ###
-REST URL for a [network layer](http://resources.arcgis.com/en/help/rest/apiref/index.html?nalayer.html).
+REST URL for a [network layer].
 
 #### *resizeWithWindow* ###
-Set to `true` to call the map's [resize](http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/map.htm#resize) function when the browser window is resized.  Set to `false` otherwise.
+Set to `true` to call the map's [resize] function when the browser window is resized.  Set to `false` otherwise.
 
 ### Events ###
 
@@ -36,11 +36,11 @@ You can specify a function that will be run each time a route is successfully lo
 #### addRoute ####
 Adds a route graphic to the route layer utilizing the addRoutes function.
 ##### Parameters #####
-* route ([esri.Graphic](http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/graphic.htm))
+* route ([esri.Graphic])
 	A graphic representing a route.
 
 ##### Returns #####
-[jQuery](http://api.jquery.com/Types/#jQuery)
+[jQuery]
 
 #### addRoutes ####
 Adds an array of route graphics to the route graphics layer.
@@ -104,3 +104,12 @@ Deletes all of the route graphics that have been selected.  A user selects route
 
 ##### Returns #####
 jQuery
+
+[The MIT License]:http://opensource.org/licenses/MIT
+[Proj4js]:https://github.com/bewest/proj4js
+[localRoadsSelector.html]:../localRoadsSelector.html
+[ArcGIS REST API]:http://resources.arcgis.com/en/help/rest/apiref/
+[network layer]:http://resources.arcgis.com/en/help/rest/apiref/index.html?nalayer.html
+[resize]:http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/map.htm#resize
+[esri.Graphic]:http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/graphic.htm
+[jQuery]:http://api.jquery.com/Types/#jQuery
