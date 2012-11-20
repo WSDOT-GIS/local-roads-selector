@@ -69,4 +69,4 @@ $("#map").envelopeSelector({
 
 \* The spatial reference of `mapExtent` is actually the same as whatever the map is using.  This is normally EPSG:3857, but it is possible to set it to a different one.
 
-[esri.geometry.Extent]:(http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/extent.htm)
+[esri.geometry.Extent]:http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/extent.htm
