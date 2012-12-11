@@ -149,7 +149,7 @@
 				} (["geocoder", "outputSpatialReference"]));
 
 				return this;
-			},
+			,}
 			_updateAddressCandidateList: function (addressCandidates) {
 				var $this = this;
 				$this.element.attr("disabled", null);
@@ -222,6 +222,7 @@
 				return this;
 			},
 			_destroy: function () {
+				dojo.disconnect(this._addressToLocationsDeferred);
 				$.Widget.prototype.destroy.apply(this, arguments);
 			}
 		});
