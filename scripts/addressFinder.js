@@ -149,7 +149,7 @@
 				} (["geocoder", "outputSpatialReference"]));
 
 				return this;
-			,}
+			},
 			_updateAddressCandidateList: function (addressCandidates) {
 				var $this = this;
 				$this.element.attr("disabled", null);
