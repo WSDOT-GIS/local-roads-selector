@@ -27,10 +27,10 @@ Set to `true` to call the map's [resize] function when the browser window is res
 
 #### *intersectionFound* event handler ###
 You can specify a function that will be run each time an intersection is successfully located.
-This function should have two parameters: event and intersection.
+This function should have two parameters: `event` and `intersection`.
 
 ##### intersection #####
-The intersection parameters is an [esri.Graphic] object with an [esri.geometry.Point] for its `geometry` property.
+The `intersection` parameter is an [esri.Graphic] object with an [esri.geometry.Point] for its `geometry` property.
 
 ```javascript
 $("#map").localRoadsSelector({
@@ -42,6 +42,18 @@ $("#map").localRoadsSelector({
 
 #### *routeFound* event handler ###
 You can specify a function that will be run each time a route is successfully located between two intersections.
+This function should have two parameters: `event` and `route`.
+
+##### route #####
+The `route` parameter is an [esri.Graphic] object with an [esri.geometry.Polyline] for its `geometry` property.
+
+```javascript
+$("#map").localRoadsSelector({
+	routeFound: function (event, route) {
+		console.log("Route found", route);
+	}
+});
+```
 
 ### Functions ###
 
