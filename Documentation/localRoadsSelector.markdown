@@ -12,6 +12,30 @@ This code is licensed under [The MIT License].  See the `LICENSE` file for detai
 ### Setup ###
 The file [localRoadsSelector.html] demonstrates how to use this widget.
 
+```html
+<div id="map"></div>
+```
+
+```javascript
+$("#map").localRoadsSelector({
+	reverseGeocodeHandlerUrl: "./ReverseGeocodeIntersection.ashx",
+	routeTaskUrl: "http://tasks.arcgisonline.com/ArcGIS/rest/services/NetworkAnalysis/ESRI_Route_NA/NAServer/Route",
+	layers: [
+		{
+			url: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/",
+			type: "esri.layers.ArcGISTiledMapServiceLayer"
+		}
+	],
+	intersectionFound: function (event, intersection) {
+		console.log("Intersection found", intersection);
+	},
+	routeFound: function (event, route) {
+		console.log("Route found", route);
+	},
+	resizeWithWindow: false
+});
+```
+
 ### Options ###
 
 #### *reverseGeocodeHandlerUrl* ###
@@ -21,6 +45,17 @@ Defaults to `"/ReverseGeocodeIntersection.ashx"`.
 #### *routeTaskUrl* ###
 REST URL for a [network layer].
 Defaults to `"http://tasks.arcgisonline.com/ArcGIS/rest/services/NetworkAnalysis/ESRI_Route_NA/NAServer/Route"`.
+
+#### *layers* ####
+Defines which layers will be shown in the map.  Defaults to the following...
+```json
+[
+	{
+		"url": "http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/",
+		"type": "esri.layers.ArcGISTiledMapServiceLayer"
+	}
+]
+```
 
 #### *resizeWithWindow* ###
 Set to `true` to call the map's [resize] function when the browser window is resized.  Set to `false` otherwise.
