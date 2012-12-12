@@ -177,7 +177,7 @@ if (routes !== null) {
 ```
 
 ##### Sample return value #####
-```javascript
+```json
 {
     "1355338732142": [
         {
@@ -274,7 +274,7 @@ Create projected copies of route polyline graphics and return them in an array
 ##### Returns #####
 [esri.Graphic]\[\]
 
-```javascript
+```json
 [
     {
         "geometry": {
