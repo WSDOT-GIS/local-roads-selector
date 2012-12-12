@@ -16,12 +16,15 @@ The file [localRoadsSelector.html] demonstrates how to use this widget.
 
 #### *reverseGeocodeHandlerUrl* ###
 Since the [ArcGIS REST API] does not currently support reverse geocoding to an intersection, a special handler must be used that calls the [ArcGIS SOAP API](http://resources.arcgis.com/en/help/soap/10.1/)'s [reverse geocode](http://resources.arcgis.com/en/help/soap/10.1/#/ReverseGeocode/01vp000000n6000000/) endpoint and converts its results from XML to JSON.  The `ReverseGeocodeIntersection.ashx` handler provides this ability.
+Defaults to `"/ReverseGeocodeIntersection.ashx"`.
 
 #### *routeTaskUrl* ###
 REST URL for a [network layer].
+Defaults to `"http://tasks.arcgisonline.com/ArcGIS/rest/services/NetworkAnalysis/ESRI_Route_NA/NAServer/Route"`.
 
 #### *resizeWithWindow* ###
 Set to `true` to call the map's [resize] function when the browser window is resized.  Set to `false` otherwise.
+Defaults to `true`.
 
 ### Events ###
 
@@ -137,4 +140,5 @@ Deletes all of the route graphics that have been selected.  A user selects route
 [resize]:http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/map.htm#resize
 [esri.Graphic]:http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/graphic.htm
 [esri.geometry.Point]:http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/point.htm
+[esri.geometry.Polyline]:http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/polyline.htm
 [jQuery]:http://api.jquery.com/Types/#jQuery
