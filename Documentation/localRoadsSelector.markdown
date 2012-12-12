@@ -27,6 +27,18 @@ Set to `true` to call the map's [resize] function when the browser window is res
 
 #### *intersectionFound* event handler ###
 You can specify a function that will be run each time an intersection is successfully located.
+This function should have two parameters: event and intersection.
+
+##### intersection #####
+The intersection parameters is an [esri.Graphic] object with an [esri.geometry.Point] for its `geometry` property.
+
+```javascript
+$("#map").localRoadsSelector({
+	intersectionFound: function (event, intersection) {
+		console.log("Intersection found", intersection);
+	}
+});
+```
 
 #### *routeFound* event handler ###
 You can specify a function that will be run each time a route is successfully located between two intersections.
@@ -112,4 +124,5 @@ Deletes all of the route graphics that have been selected.  A user selects route
 [network layer]:http://resources.arcgis.com/en/help/rest/apiref/index.html?nalayer.html
 [resize]:http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/map.htm#resize
 [esri.Graphic]:http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/graphic.htm
+[esri.geometry.Point]:http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/point.htm
 [jQuery]:http://api.jquery.com/Types/#jQuery
