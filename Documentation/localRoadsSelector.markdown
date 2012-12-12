@@ -63,32 +63,37 @@ Defaults to `true`.
 
 ### Events ###
 
+Event handlers should be assigned to functions with the following two properties.
+
+1. [jQuery Event] object
+2. A data object.  The attributes of this object will differ between events.
+
+#### *intersectionFound* and *routeFound* data objects ####
+The data object will contain two attributes, each of which is an [esri.Graphic] object representing the same intersection, but with geometry expressed in different coordinate systems.
+
+* The `map` attribute contains the geometry in the same coordinate system as the map (normally this will be Web Mercator Auxiliary Sphere (EPSG 3857)).
+* The `sps` attribute contains the geometry in the WA State Plane South system (EPSG 2927).
+
 #### *intersectionFound* event handler ###
 You can specify a function that will be run each time an intersection is successfully located.
-This function should have two parameters: `event` and `intersection`.
-
-##### intersection #####
-The `intersection` parameter is an [esri.Graphic] object with an [esri.geometry.Point] for its `geometry` property.
+The `geometry` properties of the graphics in the event data object will be [esri.geometry.Point] objects.
 
 ```javascript
 $("#map").localRoadsSelector({
-	intersectionFound: function (event, intersection) {
-		console.log("Intersection found", intersection);
+	intersectionFound: function (event, data) {
+		console.log("Intersection found", data);
 	}
 });
 ```
 
 #### *routeFound* event handler ###
 You can specify a function that will be run each time a route is successfully located between two intersections.
-This function should have two parameters: `event` and `route`.
-
-##### route #####
-The `route` parameter is an [esri.Graphic] object with an [esri.geometry.Polyline] for its `geometry` property.
+The `geometry` properties of the graphics in the event data object will be [esri.geometry.Polyline] objects.
 
 ```javascript
 $("#map").localRoadsSelector({
-	routeFound: function (event, route) {
-		console.log("Route found", route);
+	routeFound: function (event, data) {
+		console.log("Route found", data);
 	}
 });
 ```
@@ -382,3 +387,4 @@ Deletes all of the route graphics that have been selected.  A user selects route
 [esri.geometry.Point]:http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/point.htm
 [esri.geometry.Polyline]:http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/polyline.htm
 [jQuery]:http://api.jquery.com/Types/#jQuery
+[jQuery Event]:http://api.jquery.com/category/events/event-object/
