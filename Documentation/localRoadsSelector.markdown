@@ -74,6 +74,23 @@ Adds an array of route graphics to the route graphics layer.
 ##### Parameters #####
 * routes ([esri.Graphic]\[\]): An array of route graphics.
 
+```javascript
+var routes = [
+    {
+        "attributes": {
+            "Name": "116th Ave SE & SE Petrovitsky Rd - 108th Ave SE & SE 176th St",
+            "locationId": 1353099164768,
+            "ogcSimpleGeometry": {
+                "wkt": "MULTILINESTRING((1223201.051014798 774612.7067984978,1223186.9220523157 774612.1765571064,1220575.2740293862 774708.3255519208,1220563.1713036026 774708.585946937))",
+                "srid": 2927
+            }
+        }
+    }
+];
+$("#map").localRoadsSelector("addRoutes", routes);
+```
+
+
 ##### Returns #####
 [jQuery]
 		
