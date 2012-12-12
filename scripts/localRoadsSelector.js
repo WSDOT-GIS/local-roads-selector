@@ -133,6 +133,37 @@
 		return graphic;
 	}
 
+	function projectGraphicsToSps(graphics) {
+		var projector, output, isSingleGraphic;
+		projector = new Proj4js.EsriProjector(new Proj4js.Proj("EPSG:3857"), new Proj4js.Proj("EPSG:2927"));
+
+		// Detect if input is a single graphic instead of an array of graphics.
+		isSingleGraphic = graphics.attributes;
+		// Put individual graphic inside of an array.
+		if (isSingleGraphic) {
+			graphics = [graphics];
+		}
+
+		// Project the graphics in the array.
+		output = projector.projectGraphics(graphics, function (graphic) {
+			var removeRe, name;
+
+			// Remove unwanted properties.
+			removeRe = /(?:(?:(?:First)|(?:Last))StopId)|(?:ObjectId)|(?:StopCount)|(Total_Time)|(Shape_Length)/i;
+			for (name in graphic.attributes) {
+				if (graphic.attributes.hasOwnProperty(name) && removeRe.test(name)) {
+					delete graphic.attributes[name];
+				}
+			}
+
+			// Add a property for the OGC Simple Geometry.
+			graphic.attributes.ogcSimpleGeometry = new ogc.SimpleGeometry(graphic.geometry, null, true);
+		});
+
+		// Return either a single projected graphic or an array of projected graphics, depending on the type of the input "graphics" parameter.
+		return isSingleGraphic ? output[0] : output;
+	}
+
 	$.widget("ui.localRoadsSelector", {
 		options: {
 			reverseGeocodeHandlerUrl: "/ReverseGeocodeIntersection.ashx",
@@ -234,10 +265,12 @@
 			return this;
 		},
 		_triggerIntersectionFound: function (graphic) {
-			this._trigger("intersectionFound", this, graphic);
+			var projectedGraphic = projectGraphicsToSps(graphic);
+			this._trigger("intersectionFound", this, { map: graphic, sps: projectedGraphic });
 		},
 		_triggerRouteFound: function (graphic) {
-			this._trigger("routeFound", this, graphic);
+			var projectedGraphic = projectGraphicsToSps(graphic);
+			this._trigger("routeFound", this, { map: graphic, sps: projectedGraphic });
 		},
 		getRoutes: function () {
 			/// <summary>Create projected copies of route polyline graphics and return them in an array</summary>
@@ -245,21 +278,7 @@
 			var self = this, output, projector;
 
 			projector = new Proj4js.EsriProjector(new Proj4js.Proj("EPSG:3857"), new Proj4js.Proj("EPSG:2927"));
-
-			output = projector.projectGraphics(self.routeLayer.graphics, function (graphic) {
-				var removeRe, name;
-
-				// Remove unwanted properties.
-				removeRe = /(?:(?:(?:First)|(?:Last))StopId)|(?:ObjectId)|(?:StopCount)|(Total_Time)|(Shape_Length)/i;
-				for (name in graphic.attributes) {
-					if (graphic.attributes.hasOwnProperty(name) && removeRe.test(name)) {
-						delete graphic.attributes[name];
-					}
-				}
-
-				// Add a property for the OGC Simple Geometry.
-				graphic.attributes.ogcSimpleGeometry = new ogc.SimpleGeometry(graphic.geometry, null, true);
-			});
+			output = projectGraphicsToSps(self.routeLayer.graphics);
 
 			return output;
 		},

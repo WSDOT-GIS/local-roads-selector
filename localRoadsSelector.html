@@ -85,12 +85,14 @@
 					type: "esri.layers.ArcGISTiledMapServiceLayer"
 				}
 			],
-			////intersectionFound: function (event, intersection) {
-			////	//console.log(intersection.geometry, new ogc.SimpleGeometry(intersection.geometry).toEsriGeometry());
-			////},
-			////routeFound: function (event, route) {
-			////	//console.log(route.geometry, new ogc.SimpleGeometry(route.geometry).toEsriGeometry());
-			////},
+			intersectionFound: function (event, intersection) {
+				console.log("Intersection found", intersection);
+				//console.log(intersection.geometry, new ogc.SimpleGeometry(intersection.geometry).toEsriGeometry());
+			},
+			routeFound: function (event, route) {
+				console.log("Route found", route);
+				//console.log(route.geometry, new ogc.SimpleGeometry(route.geometry).toEsriGeometry());
+			},
 			resizeWithWindow: false
 		});
 

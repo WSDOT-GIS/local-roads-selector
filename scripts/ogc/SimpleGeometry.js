@@ -5,15 +5,18 @@
  */
 /*global define,dojo,esri*/
 define(["dojo/_base/declare", "esri/geometry"], function (declare) {
+	/**
+	* @module ogc
+	*/
 	"use strict";
 
 	var ogcSimpleGeometry;
 
 	/**
-	 * Converts an array representing rings or paths (of a polygon or polyine) into OGC Simple Geometry string equivalent. 
-	 * @param {Array} An array containing arrays containing arrays of numbers. 
-	 * @returns {String} The string equivalent of the input array.  Note that the geometry type (e.g., "POLYGON") will not be included in this string.
-	 */
+	* Converts an array representing rings or paths (of a polygon or polyine) into OGC Simple Geometry string equivalent. 
+	* @param {Array} An array containing arrays containing arrays of numbers. 
+	* @returns {String} The string equivalent of the input array.  Note that the geometry type (e.g., "POLYGON") will not be included in this string.
+	*/
 	function ringsOrPathsToOgc(paths) {
 		var output = [], path, i, l, point, pi, pl, coord, ci, cl;
 
@@ -56,7 +59,7 @@ define(["dojo/_base/declare", "esri/geometry"], function (declare) {
 	}
 
 	/**
-	 * Converts and {@link esri.geometry.Multipoint} into an {@link OgcSimpleGeometry}
+	 * Converts an {@link esri.geometry.Multipoint} into an {@link OgcSimpleGeometry}
 	 * @param {esri.geometry.Multipoint}
 	 * @returns {OgcSimpleGeometry}
 	 */
