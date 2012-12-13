@@ -35,6 +35,11 @@
 		////	return output;
 		////}
 
+		/**
+		Returns the CSS class that corresponds to the given geocode score.
+		@param {Number} score
+		@returns {String} CSS class name
+		*/
 		function getCssClass(score) {
 			var output;
 			if (score > 75) {
@@ -55,9 +60,11 @@
 			_setOption: function (key, value) {
 				var $this = this, i, l, aCandidate, list = $this._list, onMouseEnter, onMouseLeave;
 
+				/**
+				Triggers the addressCandidateSelected event.
+				@param {jQuery.Event} [event] Contains property data, which is an addressCandidate property.
+				*/
 				function addressCandidateSelected(event) {
-					/// <summary>Triggers the addressCandidateSelected event.</summary>
-					/// <param name="event" type="Object">Contains property data, which is an addressCandidate property.</param>
 					var addressCandidate = event.data.addressCandidate;
 					$this._trigger("addressCandidateSelected", event, { addressCandidate: addressCandidate });
 				}
