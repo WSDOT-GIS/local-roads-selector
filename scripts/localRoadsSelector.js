@@ -134,6 +134,12 @@
 	}
 
 	function projectGraphicsToSps(graphics) {
+		/// <summary>
+		/// Projects either a single graphic or an array of graphics from 3857 to 2927.
+		/// Also removes some attributes related to finding a route that are not needed for this widget.
+		/// </summary>
+		/// <param name="graphics" type="esri.Graphic[]|esri.Graphic">Either a single esri.Graphic or an array of esri.Graphic objects.</param>
+		/// <returns type="esri.Graphic[]|esri.Graphic">The type of the output will match the the type of the "graphics" parameter.</returns>
 		var projector, output, isSingleGraphic;
 		projector = new Proj4js.EsriProjector(new Proj4js.Proj("EPSG:3857"), new Proj4js.Proj("EPSG:2927"));
 
@@ -272,13 +278,39 @@
 			var projectedGraphic = projectGraphicsToSps(graphic);
 			this._trigger("routeFound", this, { map: graphic, sps: projectedGraphic });
 		},
-		getRoutes: function () {
+		getRoutes: function (returnUnprojected) {
 			/// <summary>Create projected copies of route polyline graphics and return them in an array</summary>
+			/// <param name="returnUnprojected" type="Boolean">Optional. If set to true the original routes graphics will be returned; otherwise copies projected to State Plane South will be returned.</param>
 			/// <returns type="esri.Graphic[]" />
 			var self = this, output, projector;
 
-			projector = new Proj4js.EsriProjector(new Proj4js.Proj("EPSG:3857"), new Proj4js.Proj("EPSG:2927"));
-			output = projectGraphicsToSps(self.routeLayer.graphics);
+			if (returnUnprojected) {
+				output = self.routeLayer.graphics;
+			} else {
+				output = projectGraphicsToSps(self.routeLayer.graphics);
+			}
+
+			return output;
+		},
+		getRoutesByAttribute: function (attribute, value, returnUnprojected) {
+			/// <summary>Returns all route graphics with an attribute that has a specific value.</summary>
+			/// <param name="attribute" type="String">The name of an attribute.</param>
+			/// <param name="value">The value of the attribute.</param>
+			/// <param name="returnUnprojected" type="Boolean">Optional. If set to true the original routes graphics will be returned; otherwise copies projected to State Plane South will be returned.</param>
+			/// <returns type="esri.Graphic[]" />
+
+			var self = this, graphics = self.routeLayer.graphics, output = [], i, l, graphic;
+
+			for (i = 0, l = graphics.length; i < l; i++) {
+				graphic = graphics[i];
+				if (graphic.hasOwnProperty(attributes) && graphic.attributes.hasOwnProperty(attribute) && graphic.attributes[attribute] === value) {
+					// Create a projected copy of the graphic unless caller has specifed that the original, unprojected graphics should be returned.
+					if (!returnUnprojected) {
+						graphic = projectGraphicsToSps(graphic);
+					}
+					output.push(graphic);
+				}
+			}
 
 			return output;
 		},
@@ -348,10 +380,15 @@
 		},
 		deleteRoute: function (route) {
 			/// <summary>Deletes a route graphic from the map.</summary>
-			/// <param name="route" type="esri.Graphic">A route graphic.</param>
+			/// <param name="route" type="esri.Graphic|String">Either a route graphic or a route's "name" attribute..</param>
 			/// <returns type="jQuery" />
 			this.routeLayer.remove(route);
 			return this;
+		},
+		/**
+		Deletes all route graphics that have an attribute matching the given value.
+		*/
+		deleteRouteByAttribute: function (value, attribute) {
 		},
 		removeSelectedRoutes: function () {
 			/// <summary>Removes from the map all routes that are currently selected.</summary>
@@ -505,6 +542,23 @@
 					}
 				}
 
+				function handleRouteLayerClick(event) {
+					var graphic, layer, attr;
+					graphic = event.graphic;
+					attr = graphic.attributes;
+					if (event.type === "dblclick") {
+						self._trigger("routeDoubleClicked", event, { graphic: event.graphic });
+					} else {
+						layer = graphic.getLayer();
+						// Change the "selected" attribute.  This will determine if the renderer highlights this segment or not.
+						if (attr.selected) {
+							delete attr.selected;
+						} else {
+							attr.selected = true;
+						}
+						layer.refresh();
+					}
+				}
 
 				$(self.element).arcGisMap({
 					layers: self.options.layers,
@@ -645,16 +699,13 @@
 						map.addLayer(self.routeLayer);
 						map.addLayer(self.stopsLayer);
 
-						dojo.connect(self.routeLayer, "onClick", function (event) {
-							var graphic = event.graphic, layer = graphic.getLayer(), attr = graphic.attributes;
-							if (attr.selected) {
-								delete attr.selected;
-							} else {
-								attr.selected = true;
-							}
-							layer.refresh();
-						});
+						// Setup route layer events.
+						dojo.connect(self.routeLayer, "onClick", handleRouteLayerClick);
 
+						dojo.connect(self.routeLayer, "onDblClick", handleRouteLayerClick);
+
+
+						// Setup mouse events.
 						dojo.connect(map, "onClick", handleMapClick);
 						dojo.connect(map, "onDblClick", handleMapClick);
 
@@ -667,6 +718,7 @@
 						});
 
 						dojo.connect(map, "onMouseMove", function (event) {
+							// Change the position of the tooltip to match the mouse movement.
 							self._tooltip.css({
 								position: "absolute",
 								left: event.pageX + 10,
