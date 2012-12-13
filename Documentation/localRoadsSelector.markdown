@@ -13,7 +13,46 @@ This code is licensed under [The MIT License].  See the `LICENSE` file for detai
 The file [localRoadsSelector.html] demonstrates how to use this widget.
 
 ```html
-<div id="map"></div>
+<head>
+	<link rel="stylesheet" href="//serverapi.arcgisonline.com/jsapi/arcgis/3.2/js/esri/css/esri.css" />
+	<!-- Imports the stylesheet for Dojo's claro theme. Alternatively you could use a different theme. -->
+	<link rel="stylesheet" href="//serverapi.arcgisonline.com/jsapi/arcgis/3.2/js/dojo/dijit/themes/claro/claro.css" />
+	<!-- This stylesheet (or one from another theme) is required for the jQuery plug-in. -->
+	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/base/jquery-ui.css" />
+	<link href="styles/localRoadsSelector.css" rel="stylesheet" />
+</head>
+<body>
+	<div id="map" class="claro"></div>
+	
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		// Setup custom dojo package paths.  The location properties need to be absolute paths; relative paths will be interpreted relative to the ArcGIS Server API URL.
+		var dojoConfig = {
+			"async": true,
+			packages: [
+				{
+					"name": "ogc",
+					"location": location.pathname.replace(/\/[^\/]+$/, "") + "/scripts/ogc"
+				}
+			]
+		};
+	</script>
+	<!-- Load the ArcGIS API for JavaScript. -->
+	<script type="text/javascript" src="//serverapi.arcgisonline.com/jsapi/arcgis/?v=3.2"></script>
+	<!-- Load the WSDOT's custom ArcGIS Map jQuery widget. -->
+	<script src="Scripts/arcGisMap.js" type="text/javascript"></script>
+	<!-- Load proj4js library and projections. -->
+	<script src="Scripts/proj4js/proj4js-compressed.js" type="text/javascript"></script>
+	<script src="Scripts/proj4js/defs/EPSG2927.js" type="text/javascript"></script>
+	<script src="Scripts/proj4js/defs/EPSG3857.js" type="text/javascript"></script>
+	<!-- Load WSDOT custom helper for client-side projection of ArcGIS JS geometry objects. -->
+	<script src="Scripts/clientProjection.js" type="text/javascript"></script>
+	<!-- Load the addressFinder widget -->
+	<script src="scripts/addressFinder.js" type="text/javascript"></script>
+	<!-- Load the localRoadsSelector widget. -->
+	<script src="Scripts/localRoadsSelector.js" type="text/javascript"></script>
+</body>
 ```
 
 ```javascript
