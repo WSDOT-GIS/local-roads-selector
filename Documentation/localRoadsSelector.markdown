@@ -24,9 +24,9 @@ The file [localRoadsSelector.html] demonstrates how to use this widget.
 <body>
 	<div id="map" class="claro"></div>
 	
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
-	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js" type="text/javascript"></script>
-	<script type="text/javascript">
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+	<script>
 		// Setup custom dojo package paths.  The location properties need to be absolute paths; relative paths will be interpreted relative to the ArcGIS Server API URL.
 		var dojoConfig = {
 			"async": true,
@@ -39,19 +39,19 @@ The file [localRoadsSelector.html] demonstrates how to use this widget.
 		};
 	</script>
 	<!-- Load the ArcGIS API for JavaScript. -->
-	<script type="text/javascript" src="//serverapi.arcgisonline.com/jsapi/arcgis/?v=3.2"></script>
+	<script src="//serverapi.arcgisonline.com/jsapi/arcgis/?v=3.2"></script>
 	<!-- Load the WSDOT's custom ArcGIS Map jQuery widget. -->
-	<script src="Scripts/arcGisMap.js" type="text/javascript"></script>
+	<script src="Scripts/arcGisMap.js"></script>
 	<!-- Load proj4js library and projections. -->
-	<script src="Scripts/proj4js/proj4js-compressed.js" type="text/javascript"></script>
-	<script src="Scripts/proj4js/defs/EPSG2927.js" type="text/javascript"></script>
-	<script src="Scripts/proj4js/defs/EPSG3857.js" type="text/javascript"></script>
+	<script src="Scripts/proj4js/proj4js-compressed.js"></script>
+	<script src="Scripts/proj4js/defs/EPSG2927.js"></script>
+	<script src="Scripts/proj4js/defs/EPSG3857.js"></script>
 	<!-- Load WSDOT custom helper for client-side projection of ArcGIS JS geometry objects. -->
-	<script src="Scripts/clientProjection.js" type="text/javascript"></script>
+	<script src="Scripts/clientProjection.js"></script>
 	<!-- Load the addressFinder widget -->
-	<script src="scripts/addressFinder.js" type="text/javascript"></script>
+	<script src="scripts/addressFinder.js"></script>
 	<!-- Load the localRoadsSelector widget. -->
-	<script src="Scripts/localRoadsSelector.js" type="text/javascript"></script>
+	<script src="Scripts/localRoadsSelector.js"></script>
 </body>
 ```
 
