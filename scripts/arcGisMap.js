@@ -78,7 +78,7 @@
 				return constructor(layerDef.url, layerDef.options);
 			}
 
-			require(["esri/map"], function () {
+			require(["esri/map", "esri/dijit/Attribution"], function () {
 
 				// Set the extent option to an Extent object if it is not already.
 				if (self.options.extent && (!self.options.extent.isInstanceOf || !self.options.extent.isInstanceOf(esri.geometry.Extent))) {
