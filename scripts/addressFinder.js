@@ -123,6 +123,11 @@
 				inputBox = $this.element;
 
 				// Check that the element is of the correct type: input.
+				if (!/input/.test(inputBox[0].localName)) {
+					throw new Error("Element must be 'input'.");
+				}
+
+				// Add a class for styling.  Add keypress event so that the search for the address will begin when the user presses enter.
 				inputBox.addClass("ui-address-finder").keypress(function (eventObject) {
 					var address;
 					if (eventObject.keyCode === 13 && $this._geocoder) { // enter key
@@ -133,9 +138,6 @@
 						});
 					}
 				});
-				if (!/input/.test(inputBox[0].localName)) {
-					throw new Error("Element must be 'input'.");
-				}
 
 				// Initialize the options.
 				(function (names) {

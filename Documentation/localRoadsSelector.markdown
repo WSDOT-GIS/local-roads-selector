@@ -26,11 +26,11 @@ $("#map").localRoadsSelector({
 			type: "esri.layers.ArcGISTiledMapServiceLayer"
 		}
 	],
-	intersectionFound: function (event, intersection) {
-		console.log("Intersection found", intersection);
+	intersectionFound: function (event, data) {
+		console.log("Intersection found", data.sps); // Log the state plane south intersection result.
 	},
-	routeFound: function (event, route) {
-		console.log("Route found", route);
+	routeFound: function (event, data) {
+		console.log("Route found", data.sps); // Log the state plane south route result.
 	},
 	resizeWithWindow: false
 });
