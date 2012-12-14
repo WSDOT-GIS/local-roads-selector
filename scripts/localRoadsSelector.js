@@ -12,6 +12,16 @@
 		return new Date().getTime();
 	}
 
+	function RouteParts(main, start, end) {
+		/// <summary>Represents the parts that make up a route: main, start, end.</summary>
+		/// <param name="main" type="String">The name of the main street that the other streets cross.</param>
+		/// <param name="start" type="String">The name of the first cross street.</param>
+		/// <param name="end" type="String">The name of the last cross street.</param>
+		this.main = main;
+		this.start = start;
+		this.end = end;
+	}
+
 	function groupGraphicsByAttribute(graphics, attribute) {
 		/// <summary>Arranges graphics into groups based on an attribute.</summary>
 		/// <param name="graphics" type="esri.Graphic[]">An array of graphics.  Although this function is designed for use with esri.Graphic objects, any object with an "attributes" object property will actually work.</param>
@@ -35,7 +45,12 @@
 	function splitRouteName(routeName) {
 		/// <summary>Splits a route name into its four component street names.</summary>
 		/// <returns type="Object">An object with the following properties: main, start, and end.</returns>
-		var match, streetNames, _routeNameRegex = /^([^\-&]+?)\s*&\s*([^\-&]+?)\s*-\s*([^\-&]+?)\s*&\s*([^\-&]+)$/i; // This will be used to split the segment names.
+		var match, streetNames, routeNameRegex, crossStreetRegex;
+		// This will be used to split the segment names returned by the routing (network) service.
+		routeNameRegex = /^([^\-&]+?)\s*&\s*([^\-&]+?)\s*-\s*([^\-&]+?)\s*&\s*([^\-&]+)$/i;
+		// This will be used to split the name of a route with a name formatted as "Main Street from Cross Street 1 to Cross Street 2".
+		crossStreetRegex = /^(.+)\s+from\s+(.+)\s+to\s+(.+)$/; // Match results [full name, main street, from street, to street]. 
+		// E.g., ["Main Street from Cross Street 1 to Cross Street 2", "Main Street", "Cross Street 1", "Cross Street 2"]
 
 		function findMainStreetName(streetNames) {
 			/// <summary>Compares the list of street names and determines which is the main street.  This will be the street name that is included in the array twice.</summary>
@@ -57,17 +72,16 @@
 			}
 
 			if (main) {
-				output = {
-					main: main,
-					start: i === 1 ? streetNames[2] : streetNames[1],
-					end: j === 3 ? streetNames[4] : streetNames[3]
-				};
+				output = new RouteParts(main,
+					i === 1 ? streetNames[2] : streetNames[1],
+					j === 3 ? streetNames[4] : streetNames[3]
+				);
 			}
 
 			return output;
 		}
 
-		match = _routeNameRegex.exec(routeName);
+		match = routeNameRegex.exec(routeName);
 
 		if (match) {
 			streetNames = findMainStreetName(match);
@@ -75,7 +89,12 @@
 				streetNames = match;
 			}
 		} else {
-			streetNames = null;
+			match = routeName.match(crossStreetRegex);
+			if (match) {
+				streetNames = new RouteParts(match[1], match[2], match[3]);
+			} else {
+				streetNames = null;
+			}
 		}
 
 		return streetNames;
@@ -283,7 +302,7 @@
 			/// <summary>Create projected copies of route polyline graphics and return them in an array</summary>
 			/// <param name="returnUnprojected" type="Boolean">Optional. If set to true the original routes graphics will be returned; otherwise copies projected to State Plane South will be returned.</param>
 			/// <returns type="esri.Graphic[]" />
-			var self = this, output, projector;
+			var self = this, output;
 
 			if (returnUnprojected) {
 				output = self.routeLayer.graphics;
@@ -316,7 +335,7 @@
 			return output;
 		},
 		getGroupedRoutes: function () {
-			/// <summary>Gets the route graphics from the map and groups them by their locationId attribute.  Each unique locationId will have corresponding property in the output object.</summary>
+			/// <summary>Gets the route graphics from the map and groups them by their locationId attribute.  Each unique locationId will have corresponding property in the output object.  The value of that property will be an array of esri.Graphic objects.</summary>
 			/// <returns type="Object" />
 			var routes = this.getRoutes();
 			/*jslint eqeq:true*/
@@ -503,6 +522,7 @@
 																route.attributes.parts = segParts;
 															} else {
 																route.attributes.Name = [segParts.main, "from", segParts.start, "to", segParts.end].join(" ");
+																route.attributes.parts = segParts;
 															}
 														}
 
@@ -595,7 +615,7 @@
 								title: "Enter an intersection here and press enter to find it on the map.",
 								placeholder: "Enter address or intersection"
 							}).addClass("ui-corner-all").appendTo(toolbar).addressFinder({
-								addressCandidateSelected: function (event, data) {
+								addressCandidateSelected: function (event, data) { // The event parameter, although not used, is necessary to match the event handler signature.  (The data parameter comes second, so another parameter needs to precede it even if it is not used.)
 									var addressCandidate;
 									addressCandidate = data.addressCandidate;
 
@@ -747,4 +767,11 @@
 			$.Widget.prototype.destroy.apply(this, arguments);
 		}
 	});
+
+	// Add the splitRouteName function to the jQuery namespace.
+	if (!$.wsdot) {
+		$.wsdot = { splitRouteName: splitRouteName };
+	} else {
+		$.wsdot.splitRouteName = splitRouteName;
+	}
 } (jQuery));

@@ -9,7 +9,7 @@ This code is licensed under [The MIT License].  See the `LICENSE` file for detai
 ## Acknowledgements ##
 * [Proj4js]: This is used to perform client side map projections.
 
-### Setup ###
+## Setup ##
 The file [localRoadsSelector.html] demonstrates how to use this widget.
 
 ```html
@@ -458,6 +458,16 @@ Deletes all of the route graphics that have been selected.  A user selects route
 
 ##### Returns #####
 [jQuery]
+
+## Helper functions ##
+
+### splitRouteName ###
+Splits a route name into its component parts.
+
+#### Sample ####
+```javascript
+var parts = $.wsdot.splitRouteName("E Howell St from 12th Ave to 13th Ave");
+```
 
 [The MIT License]:http://opensource.org/licenses/MIT
 [Proj4js]:https://github.com/bewest/proj4js
