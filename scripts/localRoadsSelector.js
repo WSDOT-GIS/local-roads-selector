@@ -303,7 +303,7 @@
 
 			for (i = 0, l = graphics.length; i < l; i++) {
 				graphic = graphics[i];
-				if (graphic.hasOwnProperty(attributes) && graphic.attributes.hasOwnProperty(attribute) && graphic.attributes[attribute] === value) {
+				if (graphic.hasOwnProperty("attributes") && graphic.attributes.hasOwnProperty(attribute) && graphic.attributes[attribute] === value) {
 					// Create a projected copy of the graphic unless caller has specifed that the original, unprojected graphics should be returned.
 					if (!returnUnprojected) {
 						graphic = projectGraphicsToSps(graphic);
@@ -385,10 +385,17 @@
 			this.routeLayer.remove(route);
 			return this;
 		},
-		/**
-		Deletes all route graphics that have an attribute matching the given value.
-		*/
-		deleteRouteByAttribute: function (value, attribute) {
+		deleteRoutesByAttribute: function (attribute, value) {
+			/// <summary>Deletes all route graphics with an attribute that has a specific value.</summary>
+			/// <param name="attribute" type="String">The name of a grahpic's attribute.</param>
+			/// <param name="value">The value of the attribute.</param>
+
+			var matchingGraphics;
+
+			matchingGraphics = this.getRoutesByAttribute(attribute, value, true);
+			this.deleteRoutes(matchingGraphics);
+
+			return this;
 		},
 		removeSelectedRoutes: function () {
 			/// <summary>Removes from the map all routes that are currently selected.</summary>
