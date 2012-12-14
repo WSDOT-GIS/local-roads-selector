@@ -1,4 +1,4 @@
-﻿Local Roads Selector widget
+Local Roads Selector widget
 ===========================
 
 This widget provides a map from which a user can select road segments.  A segment is defined by a main road and two intersecting roads.
@@ -402,6 +402,26 @@ Create projected copies of route polyline graphics and return them in an array
         "infoTemplate": null
     }
 ]
+```
+
+#### getRoutesByAttribute ####
+Returns all route graphics with an attribute that has a specific value.
+
+##### Parameters #####
+1. attribute (String): The name of the attribute.
+2. value: The value of the attribute.
+3. returnUnprojected (Boolean): Optional.  If set to `true` the original routes graphics will be returned; otherwise copies projected to State Plane South will be returned.
+
+##### Examples ####
+Get all route graphics with a specific name.
+```javascript
+var routes = $("#map").localRoadsSelector("getRoutesByAttribute", "Name", "E Howell St from 12th Ave to 13th Ave");
+```
+This does the same thing as the previous example.
+```javascript
+var widget, routes;
+widget = $("#map").data("localRoadsSelector");
+routes = widget.getRoutesByAttribute("Name", "E Howell St from 12th Ave to 13th Ave");
 ```
 
 #### getSelectedRoutes ####
