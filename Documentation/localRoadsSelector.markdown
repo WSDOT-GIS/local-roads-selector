@@ -185,15 +185,6 @@ Deletes the last route graphic that was added to the map.
 ##### Returns #####
 [jQuery]
 
-#### deleteRoutes ####
-Deletes route graphics from the map.
-
-##### Parameters #####
-* routes ([esri.Graphic]\[\])
-
-##### Returns #####
-jQuery
-
 #### deleteRoute ####
 Deletes a route graphic from the map.
 
@@ -202,7 +193,36 @@ Deletes a route graphic from the map.
 	A route graphic.
 
 ##### Returns #####
-jQuery
+[jQuery]
+
+#### deleteRoutes ####
+Deletes route graphics from the map.
+
+##### Parameters #####
+* routes ([esri.Graphic]\[\])
+
+##### Returns #####
+[jQuery]
+
+#### deleteRoutesByAttribute ###
+Deletes all route graphics with an attribute that has a specific value.
+
+1. attribute (String): The name of the attribute.
+2. value: The value of the attribute.
+
+##### Examples ####
+Get all route graphics with a specific name.
+```javascript
+$("#map").localRoadsSelector("deleteRoutesByAttribute", "Name", "E Howell St from 12th Ave to 13th Ave");
+```
+This does the same thing as the previous example.
+```javascript
+var widget = $("#map").data("localRoadsSelector");
+widget.deleteRoutesByAttribute("Name", "E Howell St from 12th Ave to 13th Ave");
+```
+
+##### Returns ####
+[jQuery]
 
 #### getGroupedRoutes ####
 Gets the route graphics from the map and groups them by their locationId attribute.  Each unique locationId will have corresponding property in the output object.
@@ -411,6 +431,9 @@ Returns all route graphics with an attribute that has a specific value.
 1. attribute (String): The name of the attribute.
 2. value: The value of the attribute.
 3. returnUnprojected (Boolean): Optional.  If set to `true` the original routes graphics will be returned; otherwise copies projected to State Plane South will be returned.
+
+##### Returns #####
+[esri.Graphic]\[\]
 
 ##### Examples ####
 Get all route graphics with a specific name.
