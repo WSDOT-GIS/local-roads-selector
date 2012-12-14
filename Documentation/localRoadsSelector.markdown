@@ -1,7 +1,7 @@
 Local Roads Selector widget
 ===========================
 
-This widget provides a map from which a user can select road segments.  A segment is defined by a main road and two intersecting roads.
+This [jQuery UI widget] provides a map from which a user can select road segments.  A segment is defined by a main road and two intersecting roads.
 
 ## License ##
 This code is licensed under [The MIT License].  See the `LICENSE` file for details.
@@ -470,3 +470,4 @@ Deletes all of the route graphics that have been selected.  A user selects route
 [esri.geometry.Polyline]:http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi_start.htm#jsapi/polyline.htm
 [jQuery]:http://api.jquery.com/Types/#jQuery
 [jQuery Event]:http://api.jquery.com/category/events/event-object/
+[jQuery UI widget]:http://jqueryui.com/widget/
