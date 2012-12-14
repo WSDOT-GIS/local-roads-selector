@@ -155,16 +155,16 @@ Adds an array of route graphics to the route graphics layer.
 
 ```javascript
 var routes = [
-    {
-        "attributes": {
-            "Name": "116th Ave SE & SE Petrovitsky Rd - 108th Ave SE & SE 176th St",
-            "locationId": 1353099164768,
-            "ogcSimpleGeometry": {
-                "wkt": "MULTILINESTRING((1223201.051014798 774612.7067984978,1223186.9220523157 774612.1765571064,1220575.2740293862 774708.3255519208,1220563.1713036026 774708.585946937))",
-                "srid": 2927
-            }
-        }
-    }
+	{
+	    attributes: {
+	        Name: "E Howell St from 12th Ave to 13th Ave",
+	        locationId: 1355443805345,
+	        ogcSimpleGeometry: {
+	            "wkt": "MULTILINESTRING((1192309.0547233487 838222.5883864625,1192309.023808785 838220.7847619308,1192627.3740234564 838213.4530244468))",
+	            "srid": 2927
+	        }
+	    }
+	}
 ];
 $("#map").localRoadsSelector("addRoutes", routes);
 ```
