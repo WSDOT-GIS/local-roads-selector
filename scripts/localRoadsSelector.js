@@ -83,6 +83,7 @@
 
 	function addGeometryToGraphic(graphic) {
 		/// <summary>Adds geometry to a graphic if it does not already have one.</summary>
+		/// <returns type="esri.Graphic">Returns the same graphic that was input to the function.</returns>
 		var geometry, projector;
 
 		function projectGeometry(geometry) {
