@@ -83,6 +83,8 @@
 
 	$().ready(function () {
 		var debugButtons = $("#debugSection button");
+
+		// Define the local roads selector control
 		$("#map").localRoadsSelector({
 			reverseGeocodeHandlerUrl: "./ReverseGeocodeIntersection.ashx",
 			routeTaskUrl: "http://tasks.arcgisonline.com/ArcGIS/rest/services/NetworkAnalysis/ESRI_Route_NA/NAServer/Route",
@@ -92,15 +94,35 @@
 					type: "esri.layers.ArcGISTiledMapServiceLayer"
 				}
 			],
+			// Setup event handler for "intersection found".
 			intersectionFound: function (event, data) {
 				console.log("Intersection found", data);
 			},
+			// Setup event handler for "route found".
 			routeFound: function (event, data) {
-				console.log("Route found", data);
-				console.log("Direction", data.sps.attributes.direction);
+				var attr, parts;
+				if (data) {
+					console.log("Route found", data);
+					if (data.sps) {
+						attr = data.sps.attributes;
+						if (attr) {
+							parts = attr.parts;
+							if (parts) {
+								console.log("Affected Street:\t", parts.main);
+								console.log("Start Cross Street:\t", parts.start);
+								console.log("End Cross Street:\t", parts.end);
+							}
+							console.log("Direction:\t", attr.direction);
+							if (attr.ogcSimpleGeometry) {
+								console.log("Geometry Constructor:\t", attr.ogcSimpleGeometry.getSqlConstructor());
+							}
+						}
+					}
+				}
 			},
 			resizeWithWindow: false
 		});
+		// End: Define the local roads selector control.
 
 		if (console !== undefined && typeof (console.log) === "function") {
 			$("#getRoutesButton").button({

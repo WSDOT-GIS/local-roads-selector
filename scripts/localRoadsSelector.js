@@ -513,7 +513,7 @@
 												function getCardinalDirection(routeResult) {
 													/// <summary>Searches a routeResult for a cardinal direction.</summary>
 
-													var features, graphic, i, l, dirRe, match, output = null, turnRE, maneuverMatch, turnDir, cardinalLength = 0, turnLength = 0;
+													var features, graphic, i, l, dirRe, match, output = null, turnRE, maneuverMatch, turnDir, cardinalLength = 0;
 
 													dirRe = /(?:north)|(?:south)|(?:east)|(?:west)/i;
 													turnRE = /^esriDMT(?:(?:Turn)|(?:Sharp))((?:Left)|(?:Right))$/i;
