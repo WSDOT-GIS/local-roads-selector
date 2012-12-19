@@ -502,20 +502,62 @@
 											// routeParams.impedanceAttribute = "Length";
 											routeParams.restrictionAttributes = ["none"]; // Ignore one-way streets.
 											routeParams.returnRoutes = true;
-											routeParams.returnDirections = false;
+											routeParams.returnDirections = true;
 											routeParams.directionLengthUnits = esri.Units.MILES;
 											// TODO: Get spatial reference from map instead of creating a new object.
 											routeParams.outSpatialReference = new esri.SpatialReference({ wkid: 102100 });
 
 											routeTask.solve(routeParams, function (solveResults) {
-												var route, segParts;
+												var routeResult, route, segParts;
+
+												function getCardinalDirection(routeResult) {
+													/// <summary>Searches a routeResult for a cardinal direction.</summary>
+
+													var features, graphic, i, l, dirRe, match, output = null, turnRE, maneuverMatch, turnDir, cardinalLength = 0, turnLength = 0;
+
+													dirRe = /(?:north)|(?:south)|(?:east)|(?:west)/i;
+													turnRE = /^esriDMT(?:(?:Turn)|(?:Sharp))((?:Left)|(?:Right))$/i;
+
+													features = routeResult.directions.features;
+
+													for (i = 0, l = features.length; i < l; i++) {
+														graphic = features[i];
+														// TODO: Account for turn after the straight direction to get correct direction.
+														if (graphic.attributes.maneuverType === "esriDMTStraight") {
+															match = graphic.attributes.text.match(dirRe);
+															if (match) {
+																output = match[0].toLowerCase();
+																cardinalLength = graphic.attributes.length;
+															}
+														} else {
+															maneuverMatch = graphic.attributes.maneuverType.match(turnRE);
+															if (maneuverMatch && graphic.attributes.length > cardinalLength) {
+																turnDir = maneuverMatch[1];
+																// Modify the output cardinal direction...
+																if (output === "north") { // output must already exist.
+																	output = turnDir === "Left" ? "west" : "east";
+																} else if (output === "east") {
+																	output = turnDir === "Left" ? "north" : "south";
+																} else if (output === "south") {
+																	output = turnDir === "Left" ? "east" : "west";
+																} else if (output === "west") {
+																	output = turnDir === "Left" ? "south" : "north";
+																}
+															}
+														}
+													}
+
+													return output;
+												}
+
 												if (solveResults && solveResults.routeResults !== undefined) {
 													if (solveResults.routeResults.length) {
-														route = solveResults.routeResults[0].route;
+														routeResult = solveResults.routeResults[0];
+														route = routeResult.route;
 														// Add a spatial reference to the geometry.
 														route.geometry.setSpatialReference(routeParams.outSpatialReference);
 														route.attributes.locationId = locationId;
-
+														route.attributes.direction = getCardinalDirection(routeResult);
 														segParts = splitRouteName(route.attributes.Name);
 														if (segParts) {
 															if (segParts instanceof Array) {
