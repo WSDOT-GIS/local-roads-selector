@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrafficImpactAnalysisControls", "TrafficImpactAnalysisControls.csproj", "{DCE15FC4-141F-4BB3-9790-A2D7F2A0771E}"
 EndProject
 Global
