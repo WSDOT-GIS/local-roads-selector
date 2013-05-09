@@ -1,4 +1,4 @@
-﻿/*global jQuery, require, dojo, esri, Proj4js*/
+/*global jQuery, require, dojo, esri, Proj4js*/
 /*jslint nomen:true*/
 
 /// <reference path="arcGisMap.js" />
@@ -79,7 +79,7 @@
 							return output;
 						}
 
-						$this = $(this).data("envelopeEntryDialog");
+						$this = $(this).data("uiEnvelopeEntryDialog");
 						xmin = getNumberOrNull($this._xMinBox.val());
 						ymin = getNumberOrNull($this._yMinBox.val());
 						xmax = getNumberOrNull($this._xMaxBox.val());
@@ -108,7 +108,7 @@
 					text: "Cancel",
 					title: "Exit this dialog without setting coordinates",
 					click: function () {
-						var $this = $(this).data("envelopeEntryDialog");
+						var $this = $(this).data("uiEnvelopeEntryDialog");
 						$this.close();
 					}
 				}
@@ -232,6 +232,7 @@
 					}
 			],
 			selectedExtent: null,
+			zoomExtent: null,
 			resizeWithWindow: true
 		},
 		_manualDialog: null,
@@ -272,10 +273,24 @@
 
 			return this;
 		},
+		_setZoomExtent: function (extent) {
+			var $this = this, mapExtent, spsExtent;
+
+			if (extent) {
+				// Ensure extent is in web mercator.
+				mapExtent = statePlaneSouthToWebMercator(extent);
+				// Set the map's extent.
+				$($this.element).arcGisMap("callMapFunction", "setExtent", mapExtent);
+			}
+
+			return this;
+		},
 		// Use the _setOption method to respond to changes to options
 		_setOption: function (key, value) {
 			if (key === "selectedExtent") {
 				this._setExtent(value);
+			} else if (key === "zoomExtent") {
+				this._setZoomExtent(value);
 			}
 
 			this._superApply(arguments);
@@ -318,6 +333,10 @@
 						// If the selectedExtent option was specified in the constructor, ensure the box is added to the map.
 						if ($this.options.selectedExtent) {
 							$this._setExtent($this.options.selectedExtent);
+						}
+
+						if ($this.options.zoomExtent) {
+							$this._setZoomExtent($this.options.zoomExtent);
 						}
 
 						drawToolbar = new esri.toolbars.Draw(map);
