@@ -1,4 +1,4 @@
-/*global jQuery, require, dojo, esri, Proj4js*/
+﻿/*global jQuery, require, dojo, esri, Proj4js*/
 /*jslint nomen:true*/
 
 /// <reference path="arcGisMap.js" />
@@ -328,6 +328,8 @@
 							}
 						}
 
+						$this._trigger("mapLoad", event, map);
+
 						$this._map = map;
 
 						// If the selectedExtent option was specified in the constructor, ensure the box is added to the map.
@@ -406,6 +408,7 @@
 						}).click(function () {
 							$this._setExtent(null);
 						});
+
 
 
 					}
