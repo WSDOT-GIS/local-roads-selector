@@ -2,5 +2,11 @@
 
 (function ($) {
 	"use strict";
-	$("#map").envelopeSelector();
+	$(document).ready(function () {
+		$("#map").envelopeSelector({
+			mapLoad: function () {
+				console.log(arguments);
+			}
+		});
+	});
 } (jQuery));
