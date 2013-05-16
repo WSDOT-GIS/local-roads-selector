@@ -280,7 +280,7 @@
 				// Ensure extent is in web mercator.
 				mapExtent = statePlaneSouthToWebMercator(extent);
 				// Set the map's extent.
-				$($this.element).arcGisMap("callMapFunction", "setExtent", mapExtent);
+				$this.callMapFunction("setExtent", mapExtent);
 			}
 
 			return this;
