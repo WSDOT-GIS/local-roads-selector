@@ -51,6 +51,26 @@ $("#map").envelopeSelector("option", {
 var extent = $("#map").envelopeSelector("option", "selectedExtent");
 ```
 
+### zoomExtent ###
+Sets the zoom extent of the map.
+
+```javascript
+// Create a sample extent to zoom the map to.
+var extent = {
+	"xmin": 1143346.8900144037,
+	"ymin": 652390.3280555422,
+	"xmax": 1261527.670851071,
+	"ymax": 819514.1654625294,
+	"spatialReference": { "wkid": 2927 }
+};
+
+// Create the control.
+$("#map").envelopeSelector({
+	// Specify an initial extent.
+	zoomExtent: extent
+});
+```
+
 ## Events ##
 
 ### `extentSelect` ###

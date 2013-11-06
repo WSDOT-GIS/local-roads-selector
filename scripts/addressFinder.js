@@ -1,4 +1,4 @@
-﻿/*globals require, esri, jQuery*/
+/*globals require, esri, jQuery*/
 /*jslint white:true, nomen:true, plusplus:true */
 (function ($) {
 	"use strict";
@@ -130,7 +130,7 @@
 				inputBox = $this.element;
 
 				// Check that the element is of the correct type: input.
-				if (!/input/.test(inputBox[0].localName)) {
+				if (!inputBox[0] instanceof HTMLInputElement) {
 					throw new Error("Element must be 'input'.");
 				}
 

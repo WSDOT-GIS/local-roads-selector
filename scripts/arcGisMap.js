@@ -1,5 +1,5 @@
 ﻿/*jslint windows: true, devel: true, browser: true, white: true, nomen: true, maxerr: 50, indent: 4 */
-/*global jQuery, dojo, esri */
+/*global require, jQuery, dojo, esri */
 /// <reference path="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.6.2-vsdoc.js" />
 /// <reference path="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.15/jquery-ui.js"/>
 /// <reference path="jsapi_vsdoc_v31.js" />

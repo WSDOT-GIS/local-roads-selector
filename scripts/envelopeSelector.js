@@ -1,5 +1,5 @@
 ﻿/*global jQuery, require, dojo, esri, Proj4js*/
-/*jslint nomen:true*/
+/*jslint nomen:true,white:true*/
 
 /// <reference path="arcGisMap.js" />
 /// <reference path="proj4js/proj4js-combined.js" />
@@ -79,7 +79,7 @@
 							return output;
 						}
 
-						$this = $(this).data("envelopeEntryDialog");
+						$this = $(this).data("uiEnvelopeEntryDialog");
 						xmin = getNumberOrNull($this._xMinBox.val());
 						ymin = getNumberOrNull($this._yMinBox.val());
 						xmax = getNumberOrNull($this._xMaxBox.val());
@@ -108,7 +108,7 @@
 					text: "Cancel",
 					title: "Exit this dialog without setting coordinates",
 					click: function () {
-						var $this = $(this).data("envelopeEntryDialog");
+						var $this = $(this).data("uiEnvelopeEntryDialog");
 						$this.close();
 					}
 				}
@@ -173,7 +173,7 @@
 			(function (buttons) {
 				buttons.eq(0).button("option", "icons", { primary: "ui-icon-check" });
 				buttons.eq(1).button("option", "icons", { primary: "ui-icon-close" });
-			} ($(".ui-dialog-buttonset > button", $this.element.parent()).button("option", "text", false)));
+			}($(".ui-dialog-buttonset > button", $this.element.parent()).button("option", "text", false)));
 
 			$this._form.validate({
 				submitHandler: function (/*form*/) {
@@ -223,7 +223,7 @@
 		}
 	});
 
-	$.widget("ui.envelopeSelector", {
+	$.widget("ui.envelopeSelector", $.ui.arcGisMap, {
 		options: {
 			layers: [
 					{
@@ -232,6 +232,7 @@
 					}
 			],
 			selectedExtent: null,
+			zoomExtent: null,
 			resizeWithWindow: true
 		},
 		_manualDialog: null,
@@ -272,10 +273,24 @@
 
 			return this;
 		},
+		_setZoomExtent: function (extent) {
+			var $this = this, mapExtent, spsExtent;
+
+			if (extent) {
+				// Ensure extent is in web mercator.
+				mapExtent = statePlaneSouthToWebMercator(extent);
+				// Set the map's extent.
+				$this.callMapFunction("setExtent", mapExtent);
+			}
+
+			return this;
+		},
 		// Use the _setOption method to respond to changes to options
 		_setOption: function (key, value) {
 			if (key === "selectedExtent") {
 				this._setExtent(value);
+			} else if (key === "zoomExtent") {
+				this._setZoomExtent(value);
 			}
 
 			this._superApply(arguments);
@@ -285,111 +300,110 @@
 			/// <summary>Creates the envelopeSelector widget.</summary>
 			var $this = this;
 
-
+			$this._super();
 
 			require(["esri/toolbars/draw"], function () {
-				$($this.element).arcGisMap({
-					layers: $this.options.layers,
-					resizeWithWindow: $this.options.resizeWithWindow,
-					mapLoad: function (event, map) { // Although JSLint will complain, the "event" parameter is necessary for method signature.
-						var mapRoot, buttonDiv, drawToolbar;
+				dojo.connect($this._map, "onLoad", function (map) { // Although JSLint will complain, the "event" parameter is necessary for method signature.
+					var mapRoot, buttonDiv, drawToolbar;
 
-						function styleDrawButton() {
-							/// <summary>Changes the appearance of the draw button between draw mode and cancel mode.</summary>
-							if (!$this._isDrawing) {
-								$this._drawButton.button({
-									label: "Draw Box",
-									icons: {
-										primary: "ui-icon-pencil"
-									}
-								});
-							} else {
-								$this._drawButton.button({
-									label: "Cancel Drawing",
-									icons: {
-										primary: "ui-icon-close"
-									}
-								});
-							}
+					function styleDrawButton() {
+						/// <summary>Changes the appearance of the draw button between draw mode and cancel mode.</summary>
+						if (!$this._isDrawing) {
+							$this._drawButton.button({
+								label: "Draw Box",
+								icons: {
+									primary: "ui-icon-pencil"
+								}
+							});
+						} else {
+							$this._drawButton.button({
+								label: "Cancel Drawing",
+								icons: {
+									primary: "ui-icon-close"
+								}
+							});
 						}
+					}
 
-						$this._map = map;
+					// If the selectedExtent option was specified in the constructor, ensure the box is added to the map.
+					if ($this.options.selectedExtent) {
+						$this._setExtent($this.options.selectedExtent);
+					}
 
-						// If the selectedExtent option was specified in the constructor, ensure the box is added to the map.
-						if ($this.options.selectedExtent) {
-							$this._setExtent($this.options.selectedExtent);
+					if ($this.options.zoomExtent) {
+						$this._setZoomExtent($this.options.zoomExtent);
+					}
+
+					drawToolbar = new esri.toolbars.Draw(map);
+					dojo.connect(drawToolbar, "onDrawEnd", function (geometry) {
+						drawToolbar.deactivate();
+						$this._isDrawing = false;
+						styleDrawButton();
+						$this._setExtent(geometry);
+					});
+
+					// Get the map root div.
+					mapRoot = $(map.root);
+
+					buttonDiv = $("<div>").addClass("ui-envelope-selector-toolbar").appendTo(mapRoot);
+
+					// Setup the draw button.
+					$this._drawButton = $("<button>").text("Draw Box").attr({
+						type: "button",
+						title: "Draw Box"
+					}).appendTo(buttonDiv).button({
+						text: false,
+						icons: {
+							primary: "ui-icon-pencil"
 						}
-
-						drawToolbar = new esri.toolbars.Draw(map);
-						dojo.connect(drawToolbar, "onDrawEnd", function (geometry) {
+					}).click(function () {
+						if (!$this._isDrawing) {
+							// Set the widget to draw mode.
+							drawToolbar.activate(esri.toolbars.Draw.EXTENT);
+							$this._isDrawing = true;
+							styleDrawButton();
+						} else {
+							// Cancel the drawing.
 							drawToolbar.deactivate();
 							$this._isDrawing = false;
 							styleDrawButton();
-							$this._setExtent(geometry);
-						});
+						}
+					});
 
-						// Get the map root div.
-						mapRoot = $(map.root);
+					// Setup the manual entry button.
+					$this._manualButton = $("<button>").text("Manual").attr({
+						type: "button",
+						title: "Manual entry"
+					}).appendTo(buttonDiv).button({
+						text: false,
+						icons: {
+							primary: "ui-icon-calculator"
+						}
+					}).click(function () {
+						if (!$this._manualDialog) {
+							$this._manualDialog = $("<div>").envelopeEntryDialog({
+								selectedExtent: $this.options.selectedExtent,
+								// Connect the dialog's extentSelect event.
+								extentSelect: function (event, data) { // Although JSLint will complain, the "event" parameter is necessary for method signature.
+									$this.option("selectedExtent", data.envelope);
+								}
+							});
+						} else {
+							$this._manualDialog.envelopeEntryDialog("option", "selectedExtent", $this.options.selectedExtent).envelopeEntryDialog("open");
+						}
+					});
 
-						buttonDiv = $("<div>").addClass("ui-envelope-selector-toolbar").appendTo(mapRoot);
-
-						// Setup the draw button.
-						$this._drawButton = $("<button>").text("Draw Box").attr({
-							type: "button",
-							title: "Draw Box"
-						}).appendTo(buttonDiv).button({
-							text: false,
-							icons: {
-								primary: "ui-icon-pencil"
-							}
-						}).click(function () {
-							if (!$this._isDrawing) {
-								// Set the widget to draw mode.
-								drawToolbar.activate(esri.toolbars.Draw.EXTENT);
-								$this._isDrawing = true;
-								styleDrawButton();
-							} else {
-								// Cancel the drawing.
-								drawToolbar.deactivate();
-								$this._isDrawing = false;
-								styleDrawButton();
-							}
-						});
-
-						// Setup the manual entry button.
-						$this._manualButton = $("<button>").text("Manual").attr({
-							type: "button",
-							title: "Manual entry"
-						}).appendTo(buttonDiv).button({
-							text: false,
-							icons: {
-								primary: "ui-icon-calculator"
-							}
-						}).click(function () {
-							if (!$this._manualDialog) {
-								$this._manualDialog = $("<div>").envelopeEntryDialog({
-									selectedExtent: $this.options.selectedExtent,
-									// Connect the dialog's extentSelect event.
-									extentSelect: function (event, data) { // Although JSLint will complain, the "event" parameter is necessary for method signature.
-										$this.option("selectedExtent", data.envelope);
-									}
-								});
-							} else {
-								$this._manualDialog.envelopeEntryDialog("option", "selectedExtent", $this.options.selectedExtent).envelopeEntryDialog("open");
-							}
-						});
-
-						$this._clearButton = $("<button type='button'>Clear</button>").appendTo(buttonDiv).button({
-							text: false,
-							icons: {
-								primary: "ui-icon-trash"
-							}
-						}).click(function () {
-							$this._setExtent(null);
-						});
+					$this._clearButton = $("<button type='button'>Clear</button>").appendTo(buttonDiv).button({
+						text: false,
+						icons: {
+							primary: "ui-icon-trash"
+						}
+					}).click(function () {
+						$this._setExtent(null);
+					});
 
 
-					}
+
 				});
 			});
 
@@ -399,4 +413,4 @@
 			$.Widget.prototype.destroy.apply(this, arguments);
 		}
 	});
-} (jQuery));
+}(jQuery));
