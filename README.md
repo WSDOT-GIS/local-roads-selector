@@ -1,4 +1,6 @@
-﻿Traffic Impact Analysis Controls
+**OBSOLETE - USE NOT RECOMMENDED**
+
+Traffic Impact Analysis Controls
 ================================
 
 This repository contains two jQuery UI widgets that were developed for a project at the Washington State Department of Transportation: `localRoadsSelector` and `envelopeSelector`.  
